@@ -114,7 +114,8 @@ save one pickle file per video in directory specified by --clip_feat_path argemu
 Alternatively, you can download the pre-computed spatiotemporal CLIP features from here.
 
 5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
-Train LLAVIDAL
+
+6. Train LLAVIDAL
 We have trained on 8 A6000 40GB GPUs using the following command,
 ```shell
 torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
