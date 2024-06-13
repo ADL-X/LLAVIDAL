@@ -330,7 +330,7 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 
 ---
 
-## Qualitative Analysis mag
+## Qualitative Analysis 🎬
 
 <p align="center">
   <img src="./llavidal/static/QA_example.png" alt="Qualitative Evaluation">
@@ -338,7 +338,7 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 
 ---
 
-## Acknowledgements pray
+## Acknowledgements 🙏
 
 + [LLaMA](https://github.com/facebookresearch/llama): Great step towards bridging vision and language!
 + [VideoChatgpt](https://github.com/mbzuai-oryx/Video-ChatGPT?tab=readme-ov-file): We thank for the foundational work.
@@ -347,7 +347,7 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
 ```bibtex
 @misc{LLAVIDAL,
-        title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living },
+        title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living},
         author={Rajatsubhra Chakraborty, Arkaprava Sinha, Dominick Reilly, Manish Kumar Govind, Pu Wang, Francois Bremond and Srijan Das},
         year={2024},
         eprint={5663312},
