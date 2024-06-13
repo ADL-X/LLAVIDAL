@@ -1,4 +1,3 @@
-# LLAVIDAL
 #  LLAVIDAL 🏃👩‍🦯‍➡️🗨️
 
 ### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
