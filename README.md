@@ -254,9 +254,14 @@ We also release [SmartHome Untrimmed Descriptions](https://tinyurl.com/evalatn) 
 
 Step 1: Download all the datasets-- [Charades](https://prior.allenai.org/projects/charades) , [LEMMA](https://sites.google.com/view/lemma-activity)(We use the exo-view) ,[SMARTHOME UNTRIMMED and TRIMMED](https://project.inria.fr/toyotasmarthome/).
 
-Step 2: For Action Forecasting access the json files and slice the videos from the start frame and end frame. Run the command ,
+Step 2: For Action Forecasting access the json files and slice the videos from the start frame and end frame.For action recognition nothing is needed.
+
+
+Step 3: Arrange the data like that in the json file provided and run the command ,
 ```shell
 cd llavidal/eval/
+```
+```shell
 python run_inference_action_recognition_charades.py
 --video_dir /path/to/videos \
   --qa_file /path/to/qa_file.json \
@@ -268,7 +273,45 @@ python run_inference_action_recognition_charades.py
 ```
 
 
-Step 3:
+Step 3: Evaulate using GPT3.5 Turbo api 
+```shell
+cd quantitative_evaluation/
+```
+```shell
+evaluate_action_recognition_charades.py
+```
+and pass the above results in STEP 2.
+
+For other methods the above steps are same 
+
+-----------------
+For video descriptions for Charades run command 
+
+```shell
+cd llavidal/eval
+```
+```shell
+python run_inference_benchmark_general.py
+```
+Pass the appropiate paths to get the results josn
+
+For video descriptions for Smarthome Untrimmed ,slice the videos in 1 minutes each and make a dense description like that of data curation process.
+
+To get individual descriptions 
+
+```shell
+cd llavidal/eval
+```
+```shell
+python run_inference_benchmark_general.py
+```python run_inference_descriptions_smarthome.py
+```
+
+We closely follow the [MEMENTOS EVALUATION](https://github.com/si0wang/Mementos) to get the object and action F1 scores
+
+We provide a notebook to achieve the execute the above approach.
+
+
 
 ---
 
