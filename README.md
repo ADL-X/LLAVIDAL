@@ -85,19 +85,22 @@ First, clone the LLAVIDAL repository by running the following commands in your t
 ```shell 
 git clone https://github.com/ADL-X/LLAVIDAL.git
 ```
+```shell 
 cd llavidal
+```
+
 ```shell
 export PYTHONPATH="./:$PYTHONPATH"
 ```
-Download LLAVIDAL Weights
 
-Next, download the LLAVIDAL weights from this link:
+
+Next, download the LLAVIDAL weights from this link:[LINK](https://tinyurl.com/model-weight)
 
 Prepare LLaVA Weights
 
 Since LLAVIDAL is built using LLaVA, you need to obtain the LLaVA weights by following these steps:
 
-Obtain the original LLaMA weights in the HuggingFace format by referring to the instructions here.
+Obtain the original LLaMA weights in the HuggingFace format by referring to the instructions [here].(https://huggingface.co/docs/transformers/en/model_doc/llama)
 
 Apply the LLaVA delta to the LLaMA weights using the provided script:
 
