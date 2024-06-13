@@ -54,7 +54,21 @@ baseline LLVMs
 
 ## Installation :wrench:
 
-Placeholder for installation instructions
+We recommend setting up a conda environment for the project:
+```shell
+conda env create -f environment.yml
+
+```
+Additionally,if you have A100 you can  install [FlashAttention](https://github.com/HazyResearch/flash-attention) for training,
+```shell
+pip install ninja
+
+git clone https://github.com/HazyResearch/flash-attention.git
+cd flash-attention
+git checkout v1.0.7
+python setup.py install
+```
+
 
 ---
 
