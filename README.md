@@ -57,9 +57,39 @@ Placeholder for installation instructions
 
 ---
 
-## Running Demo Offline :cd:
+## Running Demo :🚗:
 
-Placeholder for running demo offline instructions
+Running LLAVIDAL Demo Offline
+To run the LLAVIDAL demo on your local GPU machine, please adhere to the following steps. Keep in mind that the demo requires around 18 GB of GPU memory.
+Clone the LLAVIDAL Repository
+First, clone the LLAVIDAL repository by running the following commands in your terminal:
+```shell 
+git clone link
+```
+cd llavidal
+export PYTHONPATH="./:$PYTHONPATH"
+Download LLAVIDAL Weights
+Next, download the LLAVIDAL weights from this link:
+
+Prepare LLaVA Weights
+Since LLAVIDAL is built using LLaVA, you need to obtain the LLaVA weights by following these steps:
+
+Obtain the original LLaMA weights in the HuggingFace format by referring to the instructions here.
+Apply the LLaVA delta to the LLaMA weights using the provided script:
+
+shellCopy codepython scripts/apply_delta.py \
+    --base-model-path <path to LLaMA 7B weights> \
+    --target-model-path LLaVA-Lightning-7B-v1-1 \
+    --delta-path liuhaotian/LLaVA-Lightning-7B-delta-v1-1
+This command will download the LLaVA-Lightening-7B-v1-1 delta from HuggingFace, apply it to the specified LLaMA weights, and save the resulting LLaVA-Lightening-7B-v1-1 weights in the current directory.
+
+Finally, run the demo by executing the following command:
+```shell
+python llavidal/demo/video_demo.py \
+    --model-name <path to the LLaVA-Lightening-7B-v1-1 weights prepared in step 3> \
+    --projection_path <path to the downloaded llavidal weights>
+```
+After running the command, follow the on-screen instructions to access the demo dashboard.
 
 ---
 
