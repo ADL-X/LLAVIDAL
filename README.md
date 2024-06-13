@@ -2,7 +2,7 @@
 
 ### LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living
 
-#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>* , [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
+#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://webpages.charlotte.edu/asinha13/)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>* , [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
 \* Equally contributing first authors
 
 ##### Affiliations:
@@ -330,7 +330,7 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 
 ---
 
-## Qualitative Analysis :mag:
+## Qualitative Analysis mag
 
 <p align="center">
   <img src="./llavidal/static/QA_example.png" alt="Qualitative Evaluation">
@@ -338,16 +338,29 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 
 ---
 
-## Acknowledgements :pray:
+## Acknowledgements pray
 
-+ [LLaMA](https://github.com/facebookresearch/llama): A great attempt towards open and efficient LLMs!
-+ Additional acknowledgements as needed.
++ [LLaMA](https://github.com/facebookresearch/llama): Great step towards bridging vision and language!
++ [VideoChatgpt](https://github.com/mbzuai-oryx/Video-ChatGPT?tab=readme-ov-file): We thank for the foundational work.
++ 
 
 If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
 ```bibtex
-@inproceedings{Chakraborty2024LLAVIDAL,
-    title={LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living},
-    author={Chakraborty, Rajatsubhra and Sinha, Arkaprava and Reilly, Dominick and Govind, Manish Kumar and Wang, Pu and Bremond, François and Das, Srijan},
-    booktitle={},
-    year={2024}
-}
+@misc{LLAVIDAL,
+        title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living },
+        author={Rajatsubhra Chakraborty, Arkaprava Sinha, Dominick Reilly, Manish Kumar Govind, Pu Wang, Francois Bremond and Srijan Das},
+        year={2024},
+        eprint={5663312},
+        archivePrefix={arXiv},
+        primaryClass={cs.CV}
+      }
+```
+----------
+
+## Usage LICENSE :
+
+The dataset is protected under the CC-BY license of Creative Commons, which allows users to distribute, remix, adapt, and build upon the material in any medium or format, as long as the creator is attributed. The license allows ADL-X for commercial use. As the authors of this manuscript and collectors of this dataset, we reserve the right to distribute the data.
+
+------
+
+
