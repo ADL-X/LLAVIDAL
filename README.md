@@ -28,9 +28,18 @@ Placeholder for LLAVIDAL overview
 
 ---
 
-## Contributions :trophy:
+## Contributions ⭐:
 
-Placeholder for contributions
+We introduce ADL-X, the first multiview RGBD instruction ADL dataset, curated through a
+novel semi-automated framework for training LLVMs.
+• LLAVIDAL is introduced as the first LLVM tailored for ADL, incorporating 3D poses and
+object cues into the embedding space of the LLM.
+• A new benchmark, ADLMCQ, is proposed for an objective evaluation of LLVMs on ADL
+tasks, featuring MCQ tasks for action recognition & forecasting.
+• Exhaustive experiments are conducted to determine the optimal strategy for integrating
+poses or objects into LLAVIDAL. Evaluation of existing LLVMs on ADLMCQ and video
+description tasks reveals that LLAVIDAL trained on ADL-X significantly outperforms
+baseline LLVMs
 
 ---
 
