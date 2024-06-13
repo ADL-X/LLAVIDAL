@@ -3,25 +3,13 @@
 
 ### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
 
-#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)* , [Dominick Reilly](https://dominick-reilly.github.io/) , [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home),[Pu Wang](https://webpages.charlotte.edu/pwang13/),[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/) and [Srijan Das](https://srijandas07.github.io)
+#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)<sup>1</sup>* , [Dominick Reilly](https://dominick-reilly.github.io/)<sup>1</sup>* , [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
 \* Equally contributing first authors
 
-#### **University of North Carolina Charlotte**
+##### Affiliations:
+<sup>1</sup> University of North Carolina at Charlotte  
+<sup>2</sup> INRIA, Université Côte d’Azur
 
----
-#### **Video-based Generative Performance Benchmarking**
-Placeholder for badges
-
-#### **Zeroshot Question-Answer Evaluation**
-Placeholder for badges
-
----
-
-| Demo | Paper | Demo Clips | Offline Demo | Training | Video Instruction Data | Quantitative Evaluation | Qualitative Analysis |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Placeholder for links | Placeholder for link | Placeholder for links | Placeholder for text | Placeholder for text | Placeholder for text | Placeholder for text | Placeholder for text |
-
----
 
 ## :loudspeaker: Latest Updates
 Placeholder for updates
