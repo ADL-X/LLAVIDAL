@@ -1,4 +1,4 @@
-#  LLAVIDAL 🏃👩‍🦯‍➡️🗨️
+# <img src="./llavidal/llavidal.png" alt="LLAVIDAL" style="vertical-align:middle;"/> LLAVIDAL 🏃👩‍🦯‍➡️🗨️
 
 ### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
 
@@ -45,6 +45,9 @@ baseline LLVMs
 ---
 ## LLAVIDAL Architecture:⚙️:
 
+<p align="center">
+  <img src="./llavidal/static/ADL-architecture.png" alt="LLAVIDAL Architecture Overview">
+</p>   
 
 ---
 
