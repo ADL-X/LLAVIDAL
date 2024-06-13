@@ -46,4 +46,4 @@ class LlavidalTrainer(Trainer):
             else:
                 torch.save(weight_to_save, os.path.join(output_dir, f'mm_projector.bin'), )
 
-        # super(VideoChatGPTTrainer, self)._save(output_dir, state_dict)
+        # super(LLAVIDALTrainer, self)._save(output_dir, state_dict)

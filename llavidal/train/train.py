@@ -605,7 +605,7 @@ def train():
         (ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
-    model = VideoChatGPTLlamaForCausalLM.from_pretrained(
+    model = LLAVIDALLlamaForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
         # torch_dtype=torch.bfloat16 if training_args.bf16 else torch.float,
