@@ -26,7 +26,7 @@ LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multi
 
 
 
-## Contributions ⭐:
+## Contributions ⭐
 
 We introduce ADL-X, the first multiview RGBD instruction ADL dataset, curated through a
 novel semi-automated framework for training LLVMs.
@@ -43,7 +43,7 @@ description tasks reveals that LLAVIDAL trained on ADL-X significantly outperfor
 baseline LLVMs
 
 ---
-## LLAVIDAL Architecture:⚙️:
+## LLAVIDAL Architecture ⚙️
 
 <p align="center">
   <img src="./llavidal/static/ADL-architecture.png" alt="LLAVIDAL Architecture Overview">
@@ -72,7 +72,7 @@ python setup.py install
 
 ---
 
-## Running Demo :🚗:
+## Running Demo 🚗
 
 To run the LLAVIDAL demo on your local GPU machine, please adhere to the following steps. Keep in mind that the demo requires around 18 GB of GPU memory.
 
@@ -116,14 +116,14 @@ After running the command, follow the on-screen instructions to access the demo 
 
 ---
 
-## Training :💪🦾:
+## Training 💪🦾
 
 We train LLAVIDAL model on our 100K video instruction dataset. We initialize the training from LLaVA.
 Please follow the instructions below to train LLAVIDAL-7B model.
 Prepare LLaVA weights
-LLAVIDAL is build using LLaVA. Please follow the following instructions to get LLaVA weights.
+LLAVIDAL is build using LLaVA. Please follow the following instructions of VideoChatGPT to get LLaVA weights.
 
-Get the original LLaMA weights in the Hugging Face format by following the instructions here.
+Get the original LLaMA weights in the Hugging Face format.
 Use the following scripts to get LLaVA weights by applying our delta.
 ```shell
 python scripts/apply_delta.py \ 
@@ -247,9 +247,29 @@ You can adapt the above process for your own ADL dataset curation with any ADL d
 
 ---
 
-## Quantitative Evaluation :🧪:
+## Quantitative Evaluation 🧪
 
 We introduce two new evaluation for ADL centric tasks -- [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) which are MCQs conttaining Action Recognition and Action Forecasting Tasks.
+We also release [SmartHome Untrimmed Descriptions](https://tinyurl.com/evalatn) for the first time.
+
+Step 1: Download all the datasets-- [Charades](https://prior.allenai.org/projects/charades) , [LEMMA](https://sites.google.com/view/lemma-activity)(We use the exo-view) ,[SMARTHOME UNTRIMMED and TRIMMED](https://project.inria.fr/toyotasmarthome/).
+
+Step 2: For Action Forecasting access the json files and slice the videos from the start frame and end frame. Run the command ,
+```shell
+cd llavidal/eval/
+python run_inference_action_recognition_charades.py
+--video_dir /path/to/videos \
+  --qa_file /path/to/qa_file.json \
+  --output_dir /path/to/output \
+  --output_name results \
+  --model-name <LLAVA model path> \
+  --conv-mode llavidal_v1 \
+  --projection_path <path to LLAVIDAL WEIGHTS> 
+```
+
+
+Step 3:
+
 ---
 
 ## Qualitative Analysis :mag:
