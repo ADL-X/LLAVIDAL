@@ -11,7 +11,10 @@
 
 
 ## :loudspeaker: Latest Updates
-Placeholder for updates
+- Paper
+- Instruction Dataset
+- Model Weights
+- Evaluation Dataset
 
 ---
 
