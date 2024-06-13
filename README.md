@@ -198,14 +198,46 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
 
 ---
 
-## Video Instruction Dataset :📂:
+## Video Instruction Dataset :📂
 
 We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
 
-The dataset is in [LINK](https://studentuncc-my.sharepoint.com/personal/asinha13_uncc_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Funcc%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures&ga=1). The folders are [Video_features](
+The dataset is in [LINK](https://studentuncc-my.sharepoint.com/personal/asinha13_uncc_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Funcc%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures&ga=1). The folders are [Video_features]( https://tinyurl.com/video-features) , [Pose Features]( https://tinyurl.com/pose-features) and [Object Features](https://tinyurl.com/object-features)
+
 If you want to recreate our dataset curation pipeline you can do so in the following steps:
 
-Step 1: 
+Step 1: Download [NTURGBD dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/),follow the steps to get the dataset.
+
+Step 2: Download the action combination list we created [ACTION LIST]( https://tinyurl.com/data-curation).
+
+Step 3: Arrange the NTU videos in Performer folders like P001,P002, etc
+
+Step 4: Run the code, 
+``` shell 
+python /data_annotation/process_video_sequences.py
+```
+and pass the action combination list and video folder paths.
+
+Step 5: Download and setup [CogVLM](https://github.com/THUDM/CogVLM). Follow the instructions to deploy the huggingface version to get frame-level annotations at 0.5fps. Run the command of the CogVLM demo,
+```shell
+python cli_demo_hf.py --from_pretrained THUDM/cogvlm-chat-hf --quant 4
+```
+
+Step 6: Get dense descriptions from GPT 3.5 Turbo using command,
+``` shell 
+python /data_annotation/generate_dense_descriptions.py
+```
+Pass the appropiate paths of the files and your OPENAI api key.
+
+Step 6: Get QA pairs by running command,
+``` shell 
+python /data_annotation/generate_QA_pairs.py
+```
+Pass the previous made dense captions here and your OPENAI api key.
+
+Alternatively you can access our [TRAINING_DATA]( https://tinyurl.com/instruction-data) here if you want to skip the above process.
+
+You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
 
 ---
 
