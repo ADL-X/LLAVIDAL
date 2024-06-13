@@ -183,16 +183,16 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
 
 ---
 
-## Video Instruction Dataset :open_file_folder:
+## Video Instruction Dataset :📂:
 
-Placeholder for video instruction dataset description
+We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
+If you want to recreate our dataset curation pipeline you can do so in the following steps:
 
 ---
 
-## Quantitative Evaluation :bar_chart:
+## Quantitative Evaluation :🧪:
 
-Placeholder for quantitative evaluation description
-
+We introduce two new evaluation for ADL centric tasks -- ADLMCQ-AR & ADLMCQ-AF
 ---
 
 ## Qualitative Analysis :mag:
