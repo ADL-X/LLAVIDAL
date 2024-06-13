@@ -3,7 +3,7 @@
 
 ### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
 
-#### [Rajatsubhra Chakraborty](https://www.rajatsubhrachakraborty.com)* , [Arkaprava Sinha](https://www.arkapravasinha.com)* , [Dominick Reilly](https://dominick-reilly.github.io/) and [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home)
+#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)* , [Dominick Reilly](https://dominick-reilly.github.io/) , [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home),[Pu Wang](https://webpages.charlotte.edu/pwang13/),[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/) and [Srijan Das](https://srijandas07.github.io)
 \* Equally contributing first authors
 
 #### **University of North Carolina Charlotte**
