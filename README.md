@@ -43,6 +43,11 @@ description tasks reveals that LLAVIDAL trained on ADL-X significantly outperfor
 baseline LLVMs
 
 ---
+## LLAVIDAL Architecture:⚙️:
+
+
+---
+
 
 ## Installation :wrench:
 
