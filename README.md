@@ -112,6 +112,7 @@ After downloading the videos, please use the following command to generate CLIP 
 The script will generate the spatiotemporal features for each video and
 save one pickle file per video in directory specified by --clip_feat_path argemunt.
 Alternatively, you can download the pre-computed spatiotemporal CLIP features from here.
+5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
 Train LLAVIDAL
 We have trained on 8 A6000 40GB GPUs using the following command,
 ```shell
@@ -120,6 +121,7 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
           --version v1 \
           --data_path <path to the llavidal using `convert_instruction_json_to_training_format.py` script.> \
           --video_folder <path to the spatio-temporal features generated in step 4 using `save_spatio_temporal_clip_features.py` script> \
+          --object_folder <path to the downloaded object features>/
           --tune_mm_mlp_adapter True \
           --mm_use_vid_start_end \
           --bf16 True \
