@@ -136,23 +136,19 @@ python scripts/apply_delta.py \
 ```
 The above command will download the LLaVA-Lightening-7B-v1-1 delta from Hugging Face, apply it to the provided LLaMA
 weights and save the LLaVA-Lightening-7B-v1-1 weights in the current directory.
-Alternatively you can download the ready LLaVA-Lightening-7B weights from mmaaz60/LLaVA-Lightening-7B-v1-1.
+Alternatively you can download the ready LLaVA-Lightening-7B weights from [mmaaz60/LLaVA-Lightening-7B-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
 Prepare Dataset
-1. Download our 100K video instruction dataset from
-this download link.
-2. Convert the downloaded Json into the required format for training,
+1. Download our [ADLX dataset](https://tinyurl.com/video-features) video features.
+   or
+   Curate the dataset by following the steps in [[Video Instruction Dataset]].
+2. Convert the downloaded [NTU_QA.json]( https://tinyurl.com/instruction-data) into the required format for training,
 ```shell
 python scripts/convert_instruction_json_to_training_format.py \
         --input_json_file <path to json file downloaded in step 2> \
         --output_json_file llavidal_training.json
 The above script will generate llavidal_training.json required to train our model.
 ```
-3. Download NTU120RGBD videos
-All the videos annotated in our work are taken from NTU120RGBD dataset.
-We provide the ids of all the required videos in the train_video_ids.txt file.
-Please follow the instructions on the official site to download the videos.
-Alternatively, you can download these from here.
-4. Prepare Spatio-Temporal features using CLIP
+3. Prepare Spatio-Temporal features using CLIP
 Note that for training efficiency, we pre-computed the video spatio-temporal features and use them directly during training.
 After downloading the videos, please use the following command to generate CLIP spatio-temporal features.
  ```shell
@@ -162,7 +158,7 @@ After downloading the videos, please use the following command to generate CLIP 
 ```
 The script will generate the spatiotemporal features for each video and
 save one pickle file per video in directory specified by --clip_feat_path argemunt.
-Alternatively, you can download the pre-computed spatiotemporal CLIP features from here.
+Alternatively, you can download the pre-computed spatiotemporal CLIP features from [here](https://tinyurl.com/video-features).
 
 5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
 
@@ -198,6 +194,8 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
           --lazy_preprocess True
 
 ```
+ You can change the object features to pose features and change one line in the code to pass train_pose.py and llavidal_pose.py in train_mem.py and same object and pose features can be done with train_pose_object.py and llavidal_pose_object.py. Pass the object and pose path together in that case.
+
 
 ---
 
