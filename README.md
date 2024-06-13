@@ -1,7 +1,7 @@
 # LLAVIDAL
-#  LLAVIDAL :movie_camera: :speech_balloon:
+#  LLAVIDAL 🏃👩‍🦯‍➡️🗨️
 
-### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models]
+### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
 
 #### [Rajatsubhra Chakraborty](https://www.rajatsubhrachakraborty.com)* , [Arkaprava Sinha](https://www.arkapravasinha.com)* , [Dominick Reilly](https://dominick-reilly.github.io/) and [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home)
 \* Equally contributing first authors
