@@ -342,7 +342,8 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 
 + [LLaMA](https://github.com/facebookresearch/llama): Great step towards bridging vision and language!
 + [VideoChatgpt](https://github.com/mbzuai-oryx/Video-ChatGPT?tab=readme-ov-file): We thank for the foundational work.
-+ 
++ [LLAVA](https://llava-vl.github.io) : For inspiring the overall architecture
++ [CogVLM](https://github.com/THUDM/CogVLM): For creating a strong captioning model.
 
 If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
 ```bibtex
