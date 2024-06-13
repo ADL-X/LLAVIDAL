@@ -11,10 +11,10 @@
 
 
 ## :loudspeaker: Latest Updates
-- Paper
-- Instruction Dataset
-- Model Weights
-- Evaluation Dataset
+- Paper : [Paper](https://adl-x.github.io/static/pdfs/LLAVIDAL.pdf)
+- Instruction Dataset : [Instruction Set]( https://tinyurl.com/instruction-data)
+- Model Weights : [LLAVIDAL WEIGHTS](https://tinyurl.com/model-weight)
+- Evaluation Dataset : [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) 
 
 ---
 
@@ -307,9 +307,9 @@ To get individual descriptions
 cd llavidal/eval
 ```
 ```shell
-python run_inference_benchmark_general.py
-```python run_inference_descriptions_smarthome.py
+python run_inference_descriptions_smarthome.py
 ```
+
 
 We closely follow the [MEMENTOS EVALUATION](https://github.com/si0wang/Mementos) to get the object and action F1 scores
 
