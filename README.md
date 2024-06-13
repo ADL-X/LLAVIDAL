@@ -16,11 +16,6 @@ Placeholder for updates
 
 ---
 
-## Online Demo :computer:
-
-Placeholder for online demo description
-
----
 
 ## LLAVIDAL Overview 👁️:
 
