@@ -21,7 +21,7 @@ Placeholder for updates
 LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multimodal model designed to understand and generate meaningful conversations about activities of daily living (ADL) performed by humans in videos. Its architecture integrates multiple modalities, including video, 3D human poses, and object interaction cues, with a large language model (LLM). Here's an overview of LLAVIDAL's architecture:
 
 <p align="center">
-  <img src="./llavidal/adlteaser_final.mp4" alt="LLAVIDAL Overview">
+  <img src="./llavidal/static/adlxteaser.gif" alt="LLAVIDAL Overview">
 </p>   
 
 
