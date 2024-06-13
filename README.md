@@ -11,7 +11,10 @@
 
 
 ## :loudspeaker: Latest Updates
-Placeholder for updates
+- Paper
+- Instruction Dataset
+- Model Weights
+- Evaluation Dataset
 
 ---
 
@@ -26,7 +29,7 @@ LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multi
 
 
 
-## Contributions ⭐:
+## Contributions ⭐
 
 We introduce ADL-X, the first multiview RGBD instruction ADL dataset, curated through a
 novel semi-automated framework for training LLVMs.
@@ -43,7 +46,7 @@ description tasks reveals that LLAVIDAL trained on ADL-X significantly outperfor
 baseline LLVMs
 
 ---
-## LLAVIDAL Architecture:⚙️:
+## LLAVIDAL Architecture ⚙️
 
 <p align="center">
   <img src="./llavidal/static/ADL-architecture.png" alt="LLAVIDAL Architecture Overview">
@@ -54,11 +57,25 @@ baseline LLVMs
 
 ## Installation :wrench:
 
-Placeholder for installation instructions
+We recommend setting up a conda environment for the project:
+```shell
+conda env create -f environment.yml
+
+```
+Additionally,if you have A100 you can  install [FlashAttention](https://github.com/HazyResearch/flash-attention) for training,
+```shell
+pip install ninja
+
+git clone https://github.com/HazyResearch/flash-attention.git
+cd flash-attention
+git checkout v1.0.7
+python setup.py install
+```
+
 
 ---
 
-## Running Demo :🚗:
+## Running Demo 🚗
 
 To run the LLAVIDAL demo on your local GPU machine, please adhere to the following steps. Keep in mind that the demo requires around 18 GB of GPU memory.
 
@@ -66,7 +83,7 @@ Clone the LLAVIDAL Repository
 
 First, clone the LLAVIDAL repository by running the following commands in your terminal:
 ```shell 
-git clone link
+git clone https://github.com/ADL-X/LLAVIDAL.git
 ```
 cd llavidal
 ```shell
@@ -102,14 +119,14 @@ After running the command, follow the on-screen instructions to access the demo 
 
 ---
 
-## Training :💪🦾:
+## Training 💪🦾
 
 We train LLAVIDAL model on our 100K video instruction dataset. We initialize the training from LLaVA.
 Please follow the instructions below to train LLAVIDAL-7B model.
 Prepare LLaVA weights
-LLAVIDAL is build using LLaVA. Please follow the following instructions to get LLaVA weights.
+LLAVIDAL is build using LLaVA. Please follow the following instructions of VideoChatGPT to get LLaVA weights.
 
-Get the original LLaMA weights in the Hugging Face format by following the instructions here.
+Get the original LLaMA weights in the Hugging Face format.
 Use the following scripts to get LLaVA weights by applying our delta.
 ```shell
 python scripts/apply_delta.py \ 
@@ -184,16 +201,121 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
 
 ---
 
-## Video Instruction Dataset :📂:
+## Video Instruction Dataset :📂
 
 We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
+
+The dataset is in [LINK](https://studentuncc-my.sharepoint.com/personal/asinha13_uncc_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Funcc%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures&ga=1). The folders are [Video_features]( https://tinyurl.com/video-features) , [Pose Features]( https://tinyurl.com/pose-features) and [Object Features](https://tinyurl.com/object-features)
+
 If you want to recreate our dataset curation pipeline you can do so in the following steps:
+
+Step 1: Download [NTURGBD dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/),follow the steps to get the dataset.
+
+Step 2: Download the action combination list we created [ACTION LIST]( https://tinyurl.com/data-curation).
+
+Step 3: Arrange the NTU videos in Performer folders like P001,P002, etc
+
+Step 4: Run the code, 
+``` shell 
+python /data_annotation/process_video_sequences.py
+```
+and pass the action combination list and video folder paths.
+
+Step 5: Download and setup [CogVLM](https://github.com/THUDM/CogVLM). Follow the instructions to deploy the huggingface version to get frame-level annotations at 0.5fps. Run the command of the CogVLM demo,
+```shell
+python cli_demo_hf.py --from_pretrained THUDM/cogvlm-chat-hf --quant 4
+```
+
+Step 6: Get dense descriptions from GPT 3.5 Turbo using command,
+``` shell 
+python /data_annotation/generate_dense_descriptions.py
+```
+Pass the appropiate paths of the files and your OPENAI api key.
+
+Step 6: Get QA pairs by running command,
+``` shell 
+python /data_annotation/generate_QA_pairs.py
+```
+Pass the previous made dense captions here and your OPENAI api key.
+
+Alternatively you can access our **[TRAINING_DATA]( https://tinyurl.com/instruction-data)** here if you want to skip the above process. We have provided both jsons, the final json that would be used for training is instruction_converted_training_data.json or else you can follow scripts to convert it yourself the NTU_QA.json to instruction data.
+
+You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
+
+
+**IT IS IMPORTANT TO NOTE WE PREPROCESSED OUR DATA TO HAVE PERSON CENTRIC CROPPING THROUGH POSES.**
+
+
+**WE HIGHLIGHT IN OUR PAPER WHY PERSON CENTRIC CROPPING IS NECCESSARY FOR ADL CENTRIC INSTRUCTION DATA CURATION.**
 
 ---
 
-## Quantitative Evaluation :🧪:
+## Quantitative Evaluation 🧪
 
-We introduce two new evaluation for ADL centric tasks -- ADLMCQ-AR & ADLMCQ-AF
+We introduce two new evaluation for ADL centric tasks -- [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) which are MCQs conttaining Action Recognition and Action Forecasting Tasks.
+We also release [SmartHome Untrimmed Descriptions](https://tinyurl.com/evalatn) for the first time.
+
+Step 1: Download all the datasets-- [Charades](https://prior.allenai.org/projects/charades) , [LEMMA](https://sites.google.com/view/lemma-activity)(We use the exo-view) ,[SMARTHOME UNTRIMMED and TRIMMED](https://project.inria.fr/toyotasmarthome/).
+
+Step 2: For Action Forecasting access the json files and slice the videos from the start frame and end frame.For action recognition nothing is needed.
+
+
+Step 3: Arrange the data like that in the json file provided and run the command ,
+```shell
+cd llavidal/eval/
+```
+```shell
+python run_inference_action_recognition_charades.py
+--video_dir /path/to/videos \
+  --qa_file /path/to/qa_file.json \
+  --output_dir /path/to/output \
+  --output_name results \
+  --model-name <LLAVA model path> \
+  --conv-mode llavidal_v1 \
+  --projection_path <path to LLAVIDAL WEIGHTS> 
+```
+
+
+Step 3: Evaulate using GPT3.5 Turbo api 
+```shell
+cd quantitative_evaluation/
+```
+```shell
+evaluate_action_recognition_charades.py
+```
+and pass the above results in STEP 2.
+
+For other methods the above steps are same 
+
+-----------------
+For video descriptions for Charades run command 
+
+```shell
+cd llavidal/eval
+```
+```shell
+python run_inference_benchmark_general.py
+```
+Pass the appropiate paths to get the results josn
+
+For video descriptions for Smarthome Untrimmed ,slice the videos in 1 minutes each and make a dense description like that of data curation process.
+
+To get individual descriptions 
+
+```shell
+cd llavidal/eval
+```
+```shell
+python run_inference_benchmark_general.py
+```python run_inference_descriptions_smarthome.py
+```
+
+We closely follow the [MEMENTOS EVALUATION](https://github.com/si0wang/Mementos) to get the object and action F1 scores
+
+We provide a notebook to achieve the execute the above approach.
+
+
+
 ---
 
 ## Qualitative Analysis :mag:
