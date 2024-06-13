@@ -314,6 +314,10 @@ python run_inference_benchmark_general.py
 We closely follow the [MEMENTOS EVALUATION](https://github.com/si0wang/Mementos) to get the object and action F1 scores
 
 We provide a notebook to achieve the execute the above approach.
+Follow this notebook to get the evaluation 
+ ```shell
+cd quantitative_evaluation/mementos_evaluation.ipynb
+```
 
 
 
