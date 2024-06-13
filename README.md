@@ -1,4 +1,4 @@
-# <img src="./llavidal/static/llavidal.png" width="100px" height="100px" style="vertical-align:middle;"/> LLAVIDAL 🏃👩‍🦯‍➡️🗨️
+# <img src="./llavidal/static/llavidal.ico"  style="vertical-align:middle;"/> LLAVIDAL 🏃👩‍🦯‍➡️🗨️
 
 ### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
 
