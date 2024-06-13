@@ -1,6 +1,6 @@
 # <img src="./llavidal/static/llavidal.ico"  style="vertical-align:middle;"/> LLAVIDAL 🏃👩‍🦯‍➡️🗨️
 
-### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
+### LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living
 
 #### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)<sup>1</sup>* , [Dominick Reilly](https://dominick-reilly.github.io/)<sup>1</sup>* , [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
 \* Equally contributing first authors
