@@ -2,7 +2,7 @@
 
 ### LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living
 
-#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)<sup>1</sup>* , [Dominick Reilly](https://dominick-reilly.github.io/)<sup>1</sup>* , [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
+#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://webpages.charlotte.edu/asinha13/)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>* , [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
 \* Equally contributing first authors
 
 ##### Affiliations:
@@ -11,10 +11,10 @@
 
 
 ## :loudspeaker: Latest Updates
-- Paper
-- Instruction Dataset
-- Model Weights
-- Evaluation Dataset
+- Paper : [Paper](https://adl-x.github.io/static/pdfs/LLAVIDAL.pdf)
+- Instruction Dataset : [Instruction Set]( https://tinyurl.com/instruction-data)
+- Model Weights : [LLAVIDAL WEIGHTS](https://tinyurl.com/model-weight)
+- Evaluation Dataset : [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) 
 
 ---
 
@@ -52,6 +52,13 @@ baseline LLVMs
   <img src="./llavidal/static/ADL-architecture.png" alt="LLAVIDAL Architecture Overview">
 </p>   
 
+
+Overview of LLAVIDAL, which utilizes an LLM to integrate multiple modalities, including
+video, pose, and object features. Videos are represented by embeddings obtained from a VLM, poses
+are processed through (PoseLM), and object embeddings are obtained through (ObjectLM). These
+embeddings are projected into the LLM space, where they are concatenated with tokenized text
+queries for instruction tuning.
+
 ---
 
 
@@ -85,19 +92,22 @@ First, clone the LLAVIDAL repository by running the following commands in your t
 ```shell 
 git clone https://github.com/ADL-X/LLAVIDAL.git
 ```
+```shell 
 cd llavidal
+```
+
 ```shell
 export PYTHONPATH="./:$PYTHONPATH"
 ```
-Download LLAVIDAL Weights
 
-Next, download the LLAVIDAL weights from this link:
+
+Next, download the LLAVIDAL weights from this link:[LINK](https://tinyurl.com/model-weight)
 
 Prepare LLaVA Weights
 
 Since LLAVIDAL is built using LLaVA, you need to obtain the LLaVA weights by following these steps:
 
-Obtain the original LLaMA weights in the HuggingFace format by referring to the instructions here.
+Obtain the original LLaMA weights in the HuggingFace format by referring to the instructions [here].(https://huggingface.co/docs/transformers/en/model_doc/llama)
 
 Apply the LLaVA delta to the LLaMA weights using the provided script:
 
@@ -136,23 +146,19 @@ python scripts/apply_delta.py \
 ```
 The above command will download the LLaVA-Lightening-7B-v1-1 delta from Hugging Face, apply it to the provided LLaMA
 weights and save the LLaVA-Lightening-7B-v1-1 weights in the current directory.
-Alternatively you can download the ready LLaVA-Lightening-7B weights from mmaaz60/LLaVA-Lightening-7B-v1-1.
+Alternatively you can download the ready LLaVA-Lightening-7B weights from [mmaaz60/LLaVA-Lightening-7B-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
 Prepare Dataset
-1. Download our 100K video instruction dataset from
-this download link.
-2. Convert the downloaded Json into the required format for training,
+1. Download our [ADLX dataset](https://tinyurl.com/video-features) video features.
+   or
+   Curate the dataset by following the steps in [[Video Instruction Dataset]].
+2. Convert the downloaded [NTU_QA.json]( https://tinyurl.com/instruction-data) into the required format for training,
 ```shell
 python scripts/convert_instruction_json_to_training_format.py \
         --input_json_file <path to json file downloaded in step 2> \
         --output_json_file llavidal_training.json
 The above script will generate llavidal_training.json required to train our model.
 ```
-3. Download NTU120RGBD videos
-All the videos annotated in our work are taken from NTU120RGBD dataset.
-We provide the ids of all the required videos in the train_video_ids.txt file.
-Please follow the instructions on the official site to download the videos.
-Alternatively, you can download these from here.
-4. Prepare Spatio-Temporal features using CLIP
+3. Prepare Spatio-Temporal features using CLIP
 Note that for training efficiency, we pre-computed the video spatio-temporal features and use them directly during training.
 After downloading the videos, please use the following command to generate CLIP spatio-temporal features.
  ```shell
@@ -162,7 +168,7 @@ After downloading the videos, please use the following command to generate CLIP 
 ```
 The script will generate the spatiotemporal features for each video and
 save one pickle file per video in directory specified by --clip_feat_path argemunt.
-Alternatively, you can download the pre-computed spatiotemporal CLIP features from here.
+Alternatively, you can download the pre-computed spatiotemporal CLIP features from [here](https://tinyurl.com/video-features).
 
 5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
 
@@ -198,6 +204,8 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
           --lazy_preprocess True
 
 ```
+ You can change the object features to pose features and change one line in the code to pass train_pose.py and llavidal_pose.py in train_mem.py and same object and pose features can be done with train_pose_object.py and llavidal_pose_object.py. Pass the object and pose path together in that case.
+
 
 ---
 
@@ -243,10 +251,10 @@ Alternatively you can access our **[TRAINING_DATA]( https://tinyurl.com/instruct
 You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
 
 
-**IT IS IMPORTANT TO NOTE WE PREPROCESSED OUR DATA TO HAVE PERSON CENTRIC CROPPING THROUGH POSES.**
 
+**It is important to note we preprocessed our data to have person-centric cropping using Poses.**
 
-**WE HIGHLIGHT IN OUR PAPER WHY PERSON CENTRIC CROPPING IS NECCESSARY FOR ADL CENTRIC INSTRUCTION DATA CURATION.**
+**We highlight in our paper, why person-centric cropping is necessary for ADL Instruction Data Curation**
 
 ---
 
@@ -306,19 +314,23 @@ To get individual descriptions
 cd llavidal/eval
 ```
 ```shell
-python run_inference_benchmark_general.py
-```python run_inference_descriptions_smarthome.py
+python run_inference_descriptions_smarthome.py
 ```
+
 
 We closely follow the [MEMENTOS EVALUATION](https://github.com/si0wang/Mementos) to get the object and action F1 scores
 
 We provide a notebook to achieve the execute the above approach.
+Follow this notebook to get the evaluation 
+ ```shell
+cd quantitative_evaluation/mementos_evaluation.ipynb
+```
 
 
 
 ---
 
-## Qualitative Analysis :mag:
+## Qualitative Analysis 🎬
 
 <p align="center">
   <img src="./llavidal/static/QA_example.png" alt="Qualitative Evaluation">
@@ -326,16 +338,30 @@ We provide a notebook to achieve the execute the above approach.
 
 ---
 
-## Acknowledgements :pray:
+## Acknowledgements 🙏
 
-+ [LLaMA](https://github.com/facebookresearch/llama): A great attempt towards open and efficient LLMs!
-+ Additional acknowledgements as needed.
++ [LLaMA](https://github.com/facebookresearch/llama): Great step towards bridging vision and language!
++ [VideoChatgpt](https://github.com/mbzuai-oryx/Video-ChatGPT?tab=readme-ov-file): We thank for the foundational work.
++ [LLAVA](https://llava-vl.github.io) : For inspiring the overall architecture
++ [CogVLM](https://github.com/THUDM/CogVLM): For creating a strong captioning model.
 
 If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
 ```bibtex
-@inproceedings{Chakraborty2024LLAVIDAL,
-    title={LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living},
-    author={Chakraborty, Rajatsubhra and Sinha, Arkaprava and Reilly, Dominick and Govind, Manish Kumar and Wang, Pu and Bremond, François and Das, Srijan},
-    booktitle={},
-    year={2024}
-}
+@misc{LLAVIDAL,
+        title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living},
+        author={Rajatsubhra Chakraborty, Arkaprava Sinha, Dominick Reilly, Manish Kumar Govind, Pu Wang, Francois Bremond and Srijan Das},
+        year={2024},
+        eprint={5663312},
+        archivePrefix={arXiv},
+        primaryClass={cs.CV}
+      }
+```
+----------
+
+## Usage LICENSE :
+
+The dataset is protected under the CC-BY license of Creative Commons, which allows users to distribute, remix, adapt, and build upon the material in any medium or format, as long as the creator is attributed. The license allows ADL-X for commercial use. As the authors of this manuscript and collectors of this dataset, we reserve the right to distribute the data.
+
+------
+
+
