@@ -2,7 +2,7 @@
 
 ### LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living
 
-#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)<sup>1</sup>* , [Dominick Reilly](https://dominick-reilly.github.io/)<sup>1</sup>* , [Manish Kumar Govind](https://sites.google.com/view/manishkumargovind/home)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
+#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://www.linkedin.com/in/arkaprava-sinha)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>* , [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
 \* Equally contributing first authors
 
 ##### Affiliations:
@@ -51,6 +51,13 @@ baseline LLVMs
 <p align="center">
   <img src="./llavidal/static/ADL-architecture.png" alt="LLAVIDAL Architecture Overview">
 </p>   
+
+
+Overview of LLAVIDAL, which utilizes an LLM to integrate multiple modalities, including
+video, pose, and object features. Videos are represented by embeddings obtained from a VLM, poses
+are processed through (PoseLM), and object embeddings are obtained through (ObjectLM). These
+embeddings are projected into the LLM space, where they are concatenated with tokenized text
+queries for instruction tuning.
 
 ---
 
@@ -244,10 +251,10 @@ Alternatively you can access our **[TRAINING_DATA]( https://tinyurl.com/instruct
 You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
 
 
-**IT IS IMPORTANT TO NOTE WE PREPROCESSED OUR DATA TO HAVE PERSON CENTRIC CROPPING THROUGH POSES.**
 
+**It is important to note we preprocessed our data to have person-centric cropping using Poses.**
 
-**WE HIGHLIGHT IN OUR PAPER WHY PERSON CENTRIC CROPPING IS NECCESSARY FOR ADL CENTRIC INSTRUCTION DATA CURATION.**
+**We highlight in our paper, why person-centric cropping is necessary for ADL Instruction Data Curation**
 
 ---
 
