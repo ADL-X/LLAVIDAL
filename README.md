@@ -80,7 +80,7 @@ Clone the LLAVIDAL Repository
 
 First, clone the LLAVIDAL repository by running the following commands in your terminal:
 ```shell 
-git clone link
+git clone https://github.com/ADL-X/LLAVIDAL.git
 ```
 cd llavidal
 ```shell
