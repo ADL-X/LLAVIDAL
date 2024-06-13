@@ -68,9 +68,81 @@ Placeholder for running demo offline instructions
 
 ---
 
-## Training :train:
+## Training :💪🦾:
 
-Placeholder for training instructions
+We train LLAVIDAL model on our 100K video instruction dataset. We initialize the training from LLaVA.
+Please follow the instructions below to train LLAVIDAL-7B model.
+Prepare LLaVA weights
+LLAVIDAL is build using LLaVA. Please follow the following instructions to get LLaVA weights.
+
+Get the original LLaMA weights in the Hugging Face format by following the instructions here.
+Use the following scripts to get LLaVA weights by applying our delta.
+```shell
+python scripts/apply_delta.py \ 
+        --base-model-path <path to LLaMA 7B weights> \
+        --target-model-path LLaVA-Lightning-7B-v1-1 \
+        --delta-path liuhaotian/LLaVA-Lightning-7B-delta-v1-1
+```
+The above command will download the LLaVA-Lightening-7B-v1-1 delta from Hugging Face, apply it to the provided LLaMA
+weights and save the LLaVA-Lightening-7B-v1-1 weights in the current directory.
+Alternatively you can download the ready LLaVA-Lightening-7B weights from mmaaz60/LLaVA-Lightening-7B-v1-1.
+Prepare Dataset
+1. Download our 100K video instruction dataset from
+this download link.
+2. Convert the downloaded Json into the required format for training,
+```shell
+python scripts/convert_instruction_json_to_training_format.py \
+        --input_json_file <path to json file downloaded in step 2> \
+        --output_json_file llavidal_training.json
+The above script will generate llavidal_training.json required to train our model.
+```
+3. Download NTU120RGBD videos
+All the videos annotated in our work are taken from NTU120RGBD dataset.
+We provide the ids of all the required videos in the train_video_ids.txt file.
+Please follow the instructions on the official site to download the videos.
+Alternatively, you can download these from here.
+4. Prepare Spatio-Temporal features using CLIP
+Note that for training efficiency, we pre-computed the video spatio-temporal features and use them directly during training.
+After downloading the videos, please use the following command to generate CLIP spatio-temporal features.
+ ```shell
+ python scripts/save_spatio_temporal_clip_features.py \
+        --video_dir_path <path to the directory containing all the videos> \
+        --clip_feat_path <The output dir to save the features in.>
+```
+The script will generate the spatiotemporal features for each video and
+save one pickle file per video in directory specified by --clip_feat_path argemunt.
+Alternatively, you can download the pre-computed spatiotemporal CLIP features from here.
+Train LLAVIDAL
+We have trained on 8 A6000 40GB GPUs using the following command,
+```shell
+torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
+          --model_name_or_path <path to LLaVA-7B-Lightening-v-1-1 model> \
+          --version v1 \
+          --data_path <path to the llavidal using `convert_instruction_json_to_training_format.py` script.> \
+          --video_folder <path to the spatio-temporal features generated in step 4 using `save_spatio_temporal_clip_features.py` script> \
+          --tune_mm_mlp_adapter True \
+          --mm_use_vid_start_end \
+          --bf16 True \
+          --output_dir ./LLAVIDAL_7B-1.1_Checkpoints \
+          --num_train_epochs 3 \
+          --per_device_train_batch_size 4 \
+          --per_device_eval_batch_size 4 \
+          --gradient_accumulation_steps 1 \
+          --evaluation_strategy "no" \
+          --save_strategy "steps" \
+          --save_steps 3000 \
+          --save_total_limit 3 \
+          --learning_rate 2e-5 \
+          --weight_decay 0. \
+          --warmup_ratio 0.03 \
+          --lr_scheduler_type "cosine" \
+          --logging_steps 100 \
+          --tf32 True \
+          --model_max_length 2048 \
+          --gradient_checkpointing True \
+          --lazy_preprocess True
+
+```
 
 ---
 
