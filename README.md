@@ -1,4 +1,6 @@
-#  LLAVIDAL 🏃👩‍🦯‍➡️🗨️
+
+
+# ![LLAVIDAL](./llavidal/llavidal.png) LLAVIDAL 🏃👩‍🦯‍➡️🗨️
 
 ### LLAVIDAL: Towards Detailed Video Understanding via Large Vision and Language Models
 
