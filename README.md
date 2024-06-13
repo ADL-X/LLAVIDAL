@@ -20,17 +20,10 @@ Placeholder for updates
 
 LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multimodal model designed to understand and generate meaningful conversations about activities of daily living (ADL) performed by humans in videos. Its architecture integrates multiple modalities, including video, 3D human poses, and object interaction cues, with a large language model (LLM). Here's an overview of LLAVIDAL's architecture:
 
-Video Encoder: Input videos are encoded using a pre-trained vision-language model (VLM) such as CLIP-L/14 to obtain frame-level embeddings. These embeddings are then aggregated along temporal and spatial dimensions to generate video-level features.
-Pose Encoder (PoseLM): 3D human pose sequences are processed using a pose-language model called PoseCLIP, which consists of a pose backbone and a CLIP text encoder. The pose features are aligned with the language domain through training.
-Object Cues (ObjectLM): Relevant objects in the video are detected using a pre-trained object detection model (BLIP2) and localized using an open-vocabulary object localization model (OWLv2). Object features are extracted from the localized image regions.
-Projection Layers: The video, pose, and object features are projected into the LLM's embedding space using separate linear projection layers (T_v, T_p, T_o) to align them with the LLM's input space.
-LLM Integration: The projected video, pose, and object features are concatenated with tokenized text queries and fed into a frozen LLM (Vicuna language decoder). The LLM is fine-tuned on instructional language-vision data (ADL-X dataset) using an autoregressive training objective.
 
-During training, LLAVIDAL learns to align the video, pose, and object features with the LLM's embedding space. The model is trained on the ADL-X dataset, which contains video-text pairs, 3D poses, and action-conditioned object trajectories.
-At inference time, LLAVIDAL takes a video as input and generates meaningful conversations about the ADL performed in the video. It leverages the aligned video, pose, and object features to provide detailed and contextually relevant responses.
-The integration of pose and object cues in LLAVIDAL enables it to better understand the fine-grained actions, human-object interactions, and temporal relationships present in ADL videos compared to models that rely solely on video features.
+![Overview](llavidal/demo.gif)
 
----
+
 
 ## Contributions ⭐:
 
