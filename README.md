@@ -190,7 +190,9 @@ We introduce two new evaluation for ADL centric tasks -- ADLMCQ-AR & ADLMCQ-AF
 
 ## Qualitative Analysis :mag:
 
-Placeholder for qualitative analysis description
+<p align="center">
+  <img src="./llavidal/static/QA_example.png" alt="Qualitative Evaluation">
+</p>  
 
 ---
 
