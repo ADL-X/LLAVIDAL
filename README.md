@@ -235,21 +235,21 @@ python /data_annotation/generate_QA_pairs.py
 ```
 Pass the previous made dense captions here and your OPENAI api key.
 
-Alternatively you can access our **[TRAINING_DATA]( https://tinyurl.com/instruction-data)** here if you want to skip the above process. We have provided both jsons the final json that would be used for training is instruction_converted_training_data.json or else you can follow scripts to convert it yourself the NTU_QA.json to instruction data.
+Alternatively you can access our **[TRAINING_DATA]( https://tinyurl.com/instruction-data)** here if you want to skip the above process. We have provided both jsons, the final json that would be used for training is instruction_converted_training_data.json or else you can follow scripts to convert it yourself the NTU_QA.json to instruction data.
 
 You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
 
 
-**IT IS IMPORTANT TO NOTE WE PREPROCESSED OUR DATA TO HAVE PERSON CENTRIC CROPPING THROUGH POSES**
+**IT IS IMPORTANT TO NOTE WE PREPROCESSED OUR DATA TO HAVE PERSON CENTRIC CROPPING THROUGH POSES.**
 
 
-**WE HIGHLIGHT IN OUR PAPER WHY PERSON CENTRIC CROPPING IS NECCESSARY FOR ADL CENTRIC INSTRUCTION DATA CURATION**
+**WE HIGHLIGHT IN OUR PAPER WHY PERSON CENTRIC CROPPING IS NECCESSARY FOR ADL CENTRIC INSTRUCTION DATA CURATION.**
 
 ---
 
 ## Quantitative Evaluation :🧪:
 
-We introduce two new evaluation for ADL centric tasks -- ADLMCQ-AR & ADLMCQ-AF
+We introduce two new evaluation for ADL centric tasks -- [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) which are MCQs conttaining Action Recognition and Action Forecasting Tasks.
 ---
 
 ## Qualitative Analysis :mag:
