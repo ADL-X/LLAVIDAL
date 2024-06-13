@@ -238,6 +238,9 @@ Pass the previous made dense captions here and your OPENAI api key.
 Alternatively you can access our [TRAINING_DATA]( https://tinyurl.com/instruction-data) here if you want to skip the above process.
 
 You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
+**IT IS IMPORTANT TO NOTE WE PREPROCESSED OUR DATA TO HAVE PERSON CENTRIC CROPPING THROUGH POSES**
+
+**WE HIGHLIGHT IN OUR PAPER WHY PERSON CENTRIC CROPPING IS NECCESSARY FOR ADL CENTRIC INSTRUCTION DATA CURATION**
 
 ---
 
