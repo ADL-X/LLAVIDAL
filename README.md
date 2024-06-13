@@ -200,8 +200,10 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
 
 ## Video Instruction Dataset :📂:
 
-We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
+We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.The dataset is in [LINK](https://studentuncc-my.sharepoint.com/personal/asinha13_uncc_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Funcc%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures&ga=1)
 If you want to recreate our dataset curation pipeline you can do so in the following steps:
+
+Step 1: 
 
 ---
 
