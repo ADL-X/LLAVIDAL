@@ -347,14 +347,14 @@ cd quantitative_evaluation/mementos_evaluation.ipynb
 
 If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
 ```bibtex
-@misc{LLAVIDAL,
-        title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living},
-        author={Rajatsubhra Chakraborty, Arkaprava Sinha, Dominick Reilly, Manish Kumar Govind, Pu Wang, Francois Bremond and Srijan Das},
-        year={2024},
-        eprint={5663312},
-        archivePrefix={arXiv},
-        primaryClass={cs.CV}
-      }
+@misc{chakraborty2024llavidal,
+      title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living}, 
+      author={Rajatsubhra Chakraborty and Arkaprava Sinha and Dominick Reilly and Manish Kumar Govind and Pu Wang and Francois Bremond and Srijan Das},
+      year={2024},
+      eprint={2406.09390},
+      archivePrefix={arXiv},
+      primaryClass={id='cs.CV' full_name='Computer Vision and Pattern Recognition' is_active=True alt_name=None in_archive='cs' is_general=False description='Covers image processing, computer vision, pattern recognition, and scene understanding. Roughly includes material in ACM Subject Classes I.2.10, I.4, and I.5.'}
+}
 ```
 ----------
 
