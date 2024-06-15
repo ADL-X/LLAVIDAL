@@ -11,7 +11,7 @@
 
 
 ## :loudspeaker: Latest Updates
-- Paper : [Paper](https://adl-x.github.io/static/pdfs/LLAVIDAL.pdf)
+- Paper : [Paper](https://arxiv.org/pdf/2406.09390)
 - Instruction Dataset : [Instruction Set]( https://tinyurl.com/instruction-data)
 - Model Weights : [LLAVIDAL WEIGHTS](https://tinyurl.com/model-weight)
 - Evaluation Dataset : [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) 
