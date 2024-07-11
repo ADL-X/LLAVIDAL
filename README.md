@@ -2,20 +2,17 @@
 
 ### LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living
 
-#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://webpages.charlotte.edu/asinha13/)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>* , [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>,[Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup> and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
+#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://webpages.charlotte.edu/asinha13/)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>*, [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>, [Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup>, and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
 \* Equally contributing first authors
 
 ##### Affiliations:
 <sup>1</sup> University of North Carolina at Charlotte  
-<sup>2</sup> INRIA, Université Côte d’Azur
+<sup>2</sup> Inria, Université Côte d’Azur
 
+This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
 
-## :loudspeaker: Latest Updates
-- Paper : [Paper](https://arxiv.org/pdf/2406.09390)
-- Instruction Dataset : [Instruction Set]( https://tinyurl.com/instruction-data)
-- Model Weights : [LLAVIDAL WEIGHTS](https://tinyurl.com/model-weight)
-- Evaluation Dataset : [ADLMCQ-AR & ADLMCQ-AF]( https://tinyurl.com/evalatn) 
-
+## News :loudspeaker:
+- [Jun 13, 2024] [Paper](https://arxiv.org/pdf/2406.09390), [Instruction Set]( https://tinyurl.com/instruction-data), [Evaluation Dataset]( https://tinyurl.com/evalatn), and [Model Weights](https://tinyurl.com/model-weight) are released!
 ---
 
 
@@ -63,13 +60,20 @@ queries for instruction tuning.
 
 
 ## Installation :wrench:
+Our python environement is identical to [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT), we recommend following their installation instructions:
 
-We recommend setting up a conda environment for the project:
 ```shell
-conda env create -f environment.yml
+conda create --name=llavidal python=3.10
+conda activate llavidal
 
+git clone https://github.com/ADL-X/LLAVIDAL.git
+cd LLAVIDAL
+pip install -r requirements.txt
+
+export PYTHONPATH="./:$PYTHONPATH"
 ```
-Additionally,if you have A100 you can  install [FlashAttention](https://github.com/HazyResearch/flash-attention) for training,
+
+Additionally, if you are using A100/H100 GPUs you can install [FlashAttention](https://github.com/HazyResearch/flash-attention),
 ```shell
 pip install ninja
 
@@ -78,55 +82,23 @@ cd flash-attention
 git checkout v1.0.7
 python setup.py install
 ```
-
-
 ---
 
 ## Running Demo 🚗
-
 To run the LLAVIDAL demo on your local GPU machine, please adhere to the following steps. Keep in mind that the demo requires around 18 GB of GPU memory.
 
-Clone the LLAVIDAL Repository
-
-First, clone the LLAVIDAL repository by running the following commands in your terminal:
-```shell 
-git clone https://github.com/ADL-X/LLAVIDAL.git
-```
-```shell 
-cd llavidal
-```
-
-```shell
-export PYTHONPATH="./:$PYTHONPATH"
-```
-
-
-Next, download the LLAVIDAL weights from this link:[LINK](https://tinyurl.com/model-weight)
-
-Prepare LLaVA Weights
-
-Since LLAVIDAL is built using LLaVA, you need to obtain the LLaVA weights by following these steps:
-
-Obtain the original LLaMA weights in the HuggingFace format by referring to the instructions [here].(https://huggingface.co/docs/transformers/en/model_doc/llama)
-
-Apply the LLaVA delta to the LLaMA weights using the provided script:
-
-```shell
-python scripts/apply_delta.py \
-    --base-model-path <path to LLaMA 7B weights> \
-    --target-model-path LLaVA-Lightning-7B-v1-1 \
-    --delta-path liuhaotian/LLaVA-Lightning-7B-delta-v1-1
-This command will download the LLaVA-Lightening-7B-v1-1 delta from HuggingFace, apply it to the specified LLaMA weights, and save the resulting LLaVA-Lightening-7B-v1-1 weights in the current directory.
-```
+1. Follow the installation instructions above
+2. Download the LLAVIDAL weights from the following [link](https://tinyurl.com/model-weight)
+3. Download LLaVa weights from this [link](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
 
 Finally, run the demo by executing the following command:
 ```shell
 python llavidal/demo/video_demo.py \
-    --model-name <path to the LLaVA-Lightening-7B-v1-1 weights prepared in step 3> \
-    --projection_path <path to the downloaded llavidal weights>
+    --model-name <path to the LLaVA-7B-Lightening-v1-1 weights downloaded in step 3> \
+    --projection_path <path to the downloaded llavidal weights downloaded in step 2>
 ```
-After running the command, follow the on-screen instructions to access the demo dashboard.
 
+After running the command, follow the on-screen instructions to access the demo dashboard.
 ---
 
 ## Training 💪🦾
