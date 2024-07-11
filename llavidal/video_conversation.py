@@ -1,15 +1,13 @@
+from llavidal.eval.model_utils import load_video
 import dataclasses
 from enum import auto, Enum
 from typing import List
-from llavidal.eval.model_utils import load_video
-
 
 class SeparatorStyle(Enum):
     """Different separator style."""
     SINGLE = auto()
     TWO = auto()
     MPT = auto()
-
 
 @dataclasses.dataclass
 class Conversation:

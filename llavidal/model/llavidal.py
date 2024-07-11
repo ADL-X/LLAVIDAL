@@ -51,7 +51,7 @@ class LLAVIDALlamaModel(LlamaModel):
 
         if hasattr(config, "use_mm_proj"):
             self.mm_projector = nn.Linear(config.mm_hidden_size, config.hidden_size)
-            self.mm_projector_forobject=nn.Linear(512,config.hidden_size)
+            self.mm_projector_forobject = nn.Linear(512, config.hidden_size)
             #self.mm_projector_forpose = nn.Linear(self.vision_config.hidden_size_pose, config.hidden_size) # ! There are a lot of lines doing things to mm_projector (above). I am not implementing them for mm_projector_forpose for now
 
     def initialize_vision_modules(self, pretrain_mm_mlp_adapter=None, tune_mm_mlp_adapter=False):
@@ -112,8 +112,8 @@ class LLAVIDALlamaModel(LlamaModel):
                 object_features = object_features.to(device=self.mm_projector_forobject.weight.device, dtype=torch.bfloat16)
                 object_features_projected = self.mm_projector_forobject(object_features)
             else:
-                n=1
-                object_features = torch.zeros((1, 8, 512), device=input_ids.device)
+                n = 1
+                object_features = torch.zeros((n, 8, 512), device=input_ids.device).to(dtype=self.mm_projector_forobject.weight.dtype)
                 object_features_projected = self.mm_projector_forobject(object_features)
                 
             new_input_embeds = []
@@ -138,7 +138,9 @@ class LLAVIDALlamaModel(LlamaModel):
                     if (cur_input_ids == self.vision_config.vid_start_token).sum() != (
                             cur_input_ids == self.vision_config.vid_end_token).sum():
                         raise ValueError("The number of video start tokens and video end tokens should be the same.")
+                    
                     video_start_tokens = torch.where(cur_input_ids == self.vision_config.vid_start_token)[0]
+
                     for video_start_token_pos in video_start_tokens:
                         
                         cur_video_features = video_features[cur_video_idx].to(device=cur_input_embeds.device)
@@ -152,7 +154,7 @@ class LLAVIDALlamaModel(LlamaModel):
                             raise ValueError("The video end token should follow the video start token.")
                         if orig_embeds_params is not None:
                             # ! Get object embeddings relative to video embedding
-                            object_start_token_idx = video_start_token_pos + num_patches + 2
+                            # Object embeddings come immediately after the video embeddings
                             object_embed = torch.empty(0, 4096)
                             object_start_token_pos = video_start_token_pos + num_patches + 2
                             while n > 0:
@@ -182,14 +184,13 @@ class LLAVIDALlamaModel(LlamaModel):
                                                                 object_start_token_pos:].detach()), # everything after object
                                                                 dim=0)
 
-                        else:
-                            object_start_token_idx = video_start_token_pos + num_patches + 2
-                            object_end_token_idx = object_start_token_idx + num_object_patches + 1
-                            cur_new_input_embeds = torch.cat((cur_input_embeds[:video_start_token_pos + 1], # everything before vid
-                                                                cur_video_features, # the video features
-                                                                cur_input_embeds[video_start_token_pos + num_patches + 1:object_start_token_idx], # everything after vid and before object
-                                                                cur_object_features, # the object features
-                                                                cur_input_embeds[object_end_token_idx + 1:]), dim=0) # everything after object
+                        else: # demo mode?
+                            cur_new_input_embeds = torch.cat((cur_input_embeds[:video_start_token_pos], # everything before video start token
+                                    cur_input_embeds[video_start_token_pos:video_start_token_pos + 1], # video start token
+                                    cur_video_features, # video features
+                                    cur_input_embeds[video_start_token_pos + num_patches + 1:]), dim=0) # video end token & everything after
+
+                            
                         cur_video_idx += 1
                     new_input_embeds.append(cur_new_input_embeds)
                 else:
@@ -215,7 +216,9 @@ class LLAVIDALlamaModel(LlamaModel):
                     cur_video_idx += 1
                     
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
-       
+        else:
+            pass
+
         return super(LLAVIDALlamaModel, self).forward(
             input_ids=None, attention_mask=attention_mask, past_key_values=past_key_values,
             inputs_embeds=inputs_embeds, use_cache=use_cache,

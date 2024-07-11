@@ -1,13 +1,12 @@
 
-
+from llavidal.model import LLAVIDALLlamaForCausalLM
+from llavidal.utils import disable_torch_init
+from llavidal.constants import *
 import os
 import numpy as np
 from PIL import Image
 from decord import VideoReader, cpu
 from transformers import AutoTokenizer, CLIPVisionModel, CLIPImageProcessor
-from llavidal.model import LLAVIDALLlamaForCausalLM
-from llavidal.utils import disable_torch_init
-from llavidal.constants import *
 import torch
 from decord._ffi.base import DECORDError
 
@@ -100,7 +99,8 @@ def initialize_model(model_name, projection_path=None):
     model_name = os.path.expanduser(model_name)
 
     # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained('mmaaz60/LLaVA-7B-Lightening-v1-1')
 
     # Load model
     model = LLAVIDALLlamaForCausalLM.from_pretrained(model_name, low_cpu_mem_usage=True, torch_dtype=torch.float16,
