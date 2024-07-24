@@ -176,7 +176,7 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
           --lazy_preprocess True
 
 ```
- You can change the object features to pose features and change one line in the code to pass train_pose.py and llavidal_pose.py in train_mem.py and same object and pose features can be done with train_pose_object.py and llavidal_pose_object.py. Pass the object and pose path together in that case.
+ You can change the object features to pose features and change one line in the code to pass train_pose.py and llavidal_pose.py in train_mem.py. Similarly, for both object and pose features use train_pose_object.py and llavidal_pose_object.py. Pass the object and pose path together in that case.
 
 
 ---
