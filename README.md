@@ -61,7 +61,7 @@ queries for instruction tuning.
 
 | Paper | Offline Demo | Training | Video Instruction Data | Quantitative Evaluation 
 | :---: | :---: | :---: | :---: | :---: | 
-| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](##Running-demo-🚗) | [Training](#training-train) | [Video Instruction Dataset](#https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
+| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](##Running-demo-🚗) | [Training](#Training-💪🦾) | [Video Instruction Dataset](#https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
 
 
 
