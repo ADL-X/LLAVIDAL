@@ -15,7 +15,9 @@ This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Vid
 - [Jun 13, 2024] [Paper](https://arxiv.org/pdf/2406.09390), [Instruction Set](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6), [Evaluation Dataset](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc), and [Model Weights](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE) are released!
 ---
 
-
+| Paper | Offline Demo | Training | Video Instruction Data | Quantitative Evaluation 
+| :---: | :---: | :---: | :---: | :---: | 
+| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](#Running-demo-🚗) | [Training](#Training-💪🦾) | [Video Instruction Dataset](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
 ## LLAVIDAL Overview 👁️:
 
 LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multimodal model designed to understand and generate meaningful conversations about activities of daily living (ADL) performed by humans in videos. Its architecture integrates multiple modalities, including video, 3D human poses, and object interaction cues, with a large language model (LLM). Here's an overview of LLAVIDAL's Approach:
@@ -57,13 +59,6 @@ embeddings are projected into the LLM space, where they are concatenated with to
 queries for instruction tuning.
 
 ---
-
-
-| Paper | Offline Demo | Training | Video Instruction Data | Quantitative Evaluation 
-| :---: | :---: | :---: | :---: | :---: | 
-| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](##Running-demo-🚗) | [Training](#Training-💪🦾) | [Video Instruction Dataset](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
-
-
 
 ## Installation :wrench:
 Our python environement is identical to [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT), we recommend following their installation instructions:
