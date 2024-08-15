@@ -11,13 +11,19 @@
 
 This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
 
-## News :loudspeaker:
-- [Jun 13, 2024] [Paper](https://arxiv.org/pdf/2406.09390), [Instruction Set](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6), [Evaluation Dataset](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc), and [Model Weights](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE) are released!
----
+-----
 
-| Paper | Offline Demo | Training | Video Instruction Data | Quantitative Evaluation 
-| :---: | :---: | :---: | :---: | :---: | 
-| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](#Running-Demo-🚗) | [Training](#Training-💪-🦾) | [Video Instruction Dataset](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
+| Resource               | Link                                                                                                                            |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| **Paper**              | [![Paper](https://img.shields.io/badge/Read-Paper-blue.svg)](https://arxiv.org/pdf/2406.09390)                                  |
+| **Model Weights**      | [![Weights](https://img.shields.io/badge/Download-Model_Weights-green.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE) |
+| **Video Features**     | [![Video Features](https://img.shields.io/badge/Download-Video_Features-orange.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Ev529ctt_25ArNXTWqPF7NsBdM_m0A1SiIg9Qc1DKdCM2w?e=udCypF) |
+| **Instruction Dataset**| [![Instruction Dataset](https://img.shields.io/badge/Access-Instruction_Dataset-yellowgreen.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6) |
+| **Pose Features**      | [![Pose Features](https://img.shields.io/badge/Download-Pose_Features-purple.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EuVbSocni-VAtHzfupCBmasBmBUaB9QGDEMWTHxBH_SApA?e=m0tDBP) |
+| **Object Features**    | [![Object Features](https://img.shields.io/badge/Download-Object_Features-red.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EnpaUynIshdDmKiPk5coSBABOVimC-dc46LHF55NOzpJ1g?e=0t646T) |
+| **Quantitative Evaluation** | [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc) |
+
+
 ## LLAVIDAL Overview 👁️:
 
 LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multimodal model designed to understand and generate meaningful conversations about activities of daily living (ADL) performed by humans in videos. Its architecture integrates multiple modalities, including video, 3D human poses, and object interaction cues, with a large language model (LLM). Here's an overview of LLAVIDAL's Approach:
