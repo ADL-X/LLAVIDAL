@@ -12,7 +12,7 @@
 This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
 
 ## News :loudspeaker:
-- [Jun 13, 2024] [Paper](https://arxiv.org/pdf/2406.09390), [Instruction Set]( https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6), [Evaluation Dataset]( https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc), and [Model Weights](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE) are released!
+- [Jun 13, 2024] [Paper](https://arxiv.org/pdf/2406.09390), [Instruction Set](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6), [Evaluation Dataset](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc), and [Model Weights](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE) are released!
 ---
 
 
@@ -61,7 +61,7 @@ queries for instruction tuning.
 
 | Paper | Offline Demo | Training | Video Instruction Data | Quantitative Evaluation 
 | :---: | :---: | :---: | :---: | :---: | 
-| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](##Running-demo-🚗) | [Training](#Training-💪🦾) | [Video Instruction Dataset](#https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
+| [![paper](https://img.shields.io/badge/Paper-<COLOR>.svg)](https://arxiv.org/pdf/2406.09390) | [Offline Demo](##Running-demo-🚗) | [Training](#Training-💪🦾) | [Video Instruction Dataset](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Finstruction%5Fdata&ga=1) | [Quantitative Evaluation](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures%2Fevaluation&ga=1) |
 
 
 
