@@ -164,7 +164,7 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
 
 We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
 
-The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/object_features.zip)
+The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip)
 
 The video features are like 
 ```
