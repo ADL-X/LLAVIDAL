@@ -131,7 +131,7 @@ After downloading the videos, please use the following command to generate CLIP 
         --clip_feat_path <The output dir to save the features in.>
 ```
 The script will generate the spatiotemporal features for each video and
-save one pickle file per video in directory specified by --clip_feat_path argemunt.
+save one pickle file per video in directory specified by --clip_feat_path argument.
 Alternatively, you can download the pre-computed spatiotemporal CLIP features from [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip).
 
 5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
