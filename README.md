@@ -20,7 +20,11 @@ This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Vid
 | **Instruction Dataset**    | [![Instruction Dataset](https://img.shields.io/badge/Access-Instruction_Dataset-yellowgreen.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/instruction_data) |
 | **Pose Features**          | [![Pose Features](https://img.shields.io/badge/Download-Pose_Features-purple.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/pose_features.zip)     |
 | **Object Features**        | [![Object Features](https://img.shields.io/badge/Download-Object_Features-red.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/object_features.zip) |
+| **Data Curation**          | [Data Curation Section](#data-curation-pipeline-) |
+| **Training**               | [Training Section](#training-) |
+| **Offline Demo**           | [Running Demo Section](#running-demo-) |
 | **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) |
+
 
 
 ## LLAVIDAL Overview 👁️:
