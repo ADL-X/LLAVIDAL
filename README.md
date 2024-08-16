@@ -96,10 +96,13 @@ The above command will download the LLaVA-Lightening-7B-v1-1 delta from Hugging 
 weights and save the LLaVA-Lightening-7B-v1-1 weights in the current directory.
 Alternatively you can download the ready LLaVA-Lightening-7B weights from [mmaaz60/LLaVA-Lightening-7B-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
 Prepare Dataset
-1. Download our [ADLX dataset](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/video_features.zip) video features.
-   or
-   Curate the dataset by following the steps in [[data-curation-pipeline]].
-2. Convert the downloaded [NTU_QA.json](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) into the required format for training,
+To prepare the dataset, you have two options:
+1. **Download the pre-computed features**:
+   - Download our [ADLX dataset video features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/video_features.zip).
+2. **Curate the dataset yourself**:
+   - Follow the steps in the [Data Curation Pipeline](#data-curation-pipeline).
+
+3. Convert the downloaded [NTU_QA.json](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) into the required format for training,
 ```shell
 python scripts/convert_instruction_json_to_training_format.py \
         --input_json_file <path to json file downloaded in step 2> \
