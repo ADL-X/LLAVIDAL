@@ -175,6 +175,9 @@ We are introducing ADLX the first ADL centric video instruction dataset, due to 
 
 The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/object_features.zip)
 
+
+## Data Curation Pipeline: data : 
+
 If you want to recreate our dataset curation pipeline you can do so in the following steps:
 
 Step 1: Download [NTURGBD dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/),follow the steps to get the dataset.
