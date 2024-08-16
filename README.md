@@ -76,7 +76,7 @@ python setup.py install
 To run the LLAVIDAL demo on your local GPU machine, please adhere to the following steps. Keep in mind that the demo requires around 18 GB of GPU memory.
 
 1. Follow the installation instructions above
-2. Download the LLAVIDAL weights from the following [link](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE)
+2. Download the LLAVIDAL weights from the following [link](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights)
 3. Download LLaVa weights from this [link](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
 
 Finally, run the demo by executing the following command:
@@ -108,10 +108,10 @@ The above command will download the LLaVA-Lightening-7B-v1-1 delta from Hugging 
 weights and save the LLaVA-Lightening-7B-v1-1 weights in the current directory.
 Alternatively you can download the ready LLaVA-Lightening-7B weights from [mmaaz60/LLaVA-Lightening-7B-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
 Prepare Dataset
-1. Download our [ADLX dataset](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Ev529ctt_25ArNXTWqPF7NsBdM_m0A1SiIg9Qc1DKdCM2w?e=udCypF) video features.
+1. Download our [ADLX dataset](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip) video features.
    or
    Curate the dataset by following the steps in [[Video Instruction Dataset]].
-2. Convert the downloaded [NTU_QA.json](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6) into the required format for training,
+2. Convert the downloaded [NTU_QA.json](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) into the required format for training,
 ```shell
 python scripts/convert_instruction_json_to_training_format.py \
         --input_json_file <path to json file downloaded in step 2> \
@@ -128,7 +128,7 @@ After downloading the videos, please use the following command to generate CLIP 
 ```
 The script will generate the spatiotemporal features for each video and
 save one pickle file per video in directory specified by --clip_feat_path argemunt.
-Alternatively, you can download the pre-computed spatiotemporal CLIP features from [here](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Ev529ctt_25ArNXTWqPF7NsBdM_m0A1SiIg9Qc1DKdCM2w?e=udCypF).
+Alternatively, you can download the pre-computed spatiotemporal CLIP features from [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip).
 
 5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
 
@@ -173,15 +173,34 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
 
 We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
 
-The dataset is in [LINK](https://studentuncc-my.sharepoint.com/personal/asinha13_charlotte_edu/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2Fasinha13%5Fcharlotte%5Fedu%2FDocuments%2FLLAVIDAL%5Ffeatures). The folders are [Video_features](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Ev529ctt_25ArNXTWqPF7NsBdM_m0A1SiIg9Qc1DKdCM2w?e=udCypF) , [Pose Features](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EuVbSocni-VAtHzfupCBmasBmBUaB9QGDEMWTHxBH_SApA?e=m0tDBP) and [Object Features](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EnpaUynIshdDmKiPk5coSBABOVimC-dc46LHF55NOzpJ1g?e=0t646T)
+The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/object_features.zip)
 
 If you want to recreate our dataset curation pipeline you can do so in the following steps:
 
 Step 1: Download [NTURGBD dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/),follow the steps to get the dataset.
 
-Step 2: Download the action combination list we created [ACTION LIST](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eo4hF_wpVGFMnMC5aEb-2LAB2rw1i3_XU2VV9BrOyeJDQg?e=LkIS4B).
+Step 2: Download the action combination list we created [ACTION LIST](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/data_curation/all_action_combinations.txt).
 
-Step 3: Arrange the NTU videos in Performer folders like P001,P002, etc
+Step 3: Arrange the NTU videos in Performer folders like P001,P002, etc like
+
+```
+NTU Videos
+├── P001
+│   ├── S001C001P001R001A001_rgb.avi
+│   ├── S001C001P001R001A002_rgb.avi
+│   ├── S001C001P001R001A003_rgb.avi
+│   ...
+├── P015
+│   ├── S003C001P015R001A001_rgb.avi
+│   ├── S003C001P015R001A002_rgb.avi
+│   ├── S003C001P015R001A003_rgb.avi
+│   ├── S003C001P015R001A004_rgb.avi
+│   ├── S003C001P015R001A005_rgb.avi
+│   ...
+
+...
+
+```
 
 Step 4: Run the code, 
 ``` shell 
@@ -206,7 +225,7 @@ python /data_annotation/generate_QA_pairs.py
 ```
 Pass the previous made dense captions here and your OPENAI api key.
 
-Alternatively you can access our **[TRAINING_DATA](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6)** here if you want to skip the above process. We have provided both jsons, the final json that would be used for training is instruction_converted_training_data.json or else you can follow scripts to convert it yourself the NTU_QA.json to instruction data.
+Alternatively you can access our **[TRAINING_DATA](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/instruction_data)** here if you want to skip the above process. We have provided both jsons, the final json that would be used for training is instruction_converted_training_data.json or else you can follow scripts to convert it yourself the NTU_QA.json to instruction data.
 
 You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
 
@@ -220,8 +239,8 @@ You can adapt the above process for your own ADL dataset curation with any ADL d
 
 ## Quantitative Evaluation 🧪
 
-We introduce two new evaluation for ADL centric tasks -- [ADLMCQ-AR & ADLMCQ-AF](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc) which are MCQs conttaining Action Recognition and Action Forecasting Tasks.
-We also release [SmartHome Untrimmed Descriptions](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc) for the first time.
+We introduce two new evaluation for ADL centric tasks -- [ADLMCQ-AR & ADLMCQ-AF](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) which are MCQs conttaining Action Recognition and Action Forecasting Tasks.
+We also release [SmartHome Untrimmed Descriptions](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/evaluation/Video_description_Smarthome_Untrimmed.json) for the first time.
 
 Step 1: Download all the datasets-- [Charades](https://prior.allenai.org/projects/charades) , [LEMMA](https://sites.google.com/view/lemma-activity)(We use the exo-view) ,[SMARTHOME UNTRIMMED and TRIMMED](https://project.inria.fr/toyotasmarthome/).
 
