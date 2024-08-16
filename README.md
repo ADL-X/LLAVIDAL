@@ -1,39 +1,23 @@
-# <img src="./llavidal/static/llavidal.ico"  style="vertical-align:middle;"/> LLAVIDAL 🏃👩‍🦯‍➡️🗨️
-
-### LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living
-
-#### [Rajatsubhra Chakraborty](https://chakrabortyrajatsubhra.github.io)<sup>1</sup>* , [Arkaprava Sinha](https://webpages.charlotte.edu/asinha13/)<sup>1</sup>* , [Dominick Reilly](https://dominickrei.github.io)<sup>1</sup>*, [Manish Kumar Govind](https://manishgovind.github.io/)<sup>1</sup>, [Pu Wang](https://webpages.charlotte.edu/pwang13/)<sup>1</sup>, [Francois Bremond](http://www-sop.inria.fr/members/Francois.Bremond/)<sup>2</sup>, and [Srijan Das](https://srijandas07.github.io)<sup>1</sup>
-\* Equally contributing first authors
-
-##### Affiliations:
-<sup>1</sup> University of North Carolina at Charlotte  
-<sup>2</sup> Inria, Université Côte d’Azur
-
-This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
-
------
-| **Resource**               | **Link**                                                                                                                                                                                            |
-|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Paper**                  | [![Paper](https://img.shields.io/badge/Read-Paper-blue.svg)](https://arxiv.org/pdf/2406.09390)                                                                                                      |
-| **Model Weights**          | [![Weights](https://img.shields.io/badge/Download-Model_Weights-green.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights)     |
-| **Video Features**         | [![Video Features](https://img.shields.io/badge/Download-Video_Features-orange.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip) |
-| **Instruction Dataset**    | [![Instruction Dataset](https://img.shields.io/badge/Access-Instruction_Dataset-yellowgreen.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/instruction_data) |
-| **Pose Features**          | [![Pose Features](https://img.shields.io/badge/Download-Pose_Features-purple.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/pose_features.zip)     |
-| **Object Features**        | [![Object Features](https://img.shields.io/badge/Download-Object_Features-red.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/object_features.zip) |
-| **Data Curation**          | [![Data Curation](https://img.shields.io/badge/Read-Data_Curation-aquamarine.svg)](#data-curation-pipeline-) |
-| **Training**               | [![Training](https://img.shields.io/badge/Start-Training-crimson.svg)](#training-) |
-| **Offline Demo**           | [![Offline Demo](https://img.shields.io/badge/Run-Offline_Demo-teal.svg)](#running-demo-) |
-| **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) |
-
-
-
-## LLAVIDAL Overview 👁️:
-
-LLAVIDAL (Large LAnguage VIsion model for Daily Activities of Living) is a multimodal model designed to understand and generate meaningful conversations about activities of daily living (ADL) performed by humans in videos. Its architecture integrates multiple modalities, including video, 3D human poses, and object interaction cues, with a large language model (LLM). Here's an overview of LLAVIDAL's Approach:
+# <img src="./llavidal/static/llavidal.ico"  style="vertical-align:middle;"/> LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living 🏃👩‍🦯‍➡️🗨️
 
 <p align="center">
   <img src="./llavidal/static/adlxteaser.gif" alt="LLAVIDAL Approach Overview">
 </p>   
+
+This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
+
+-----
+## Available resources
+| **Resource**               | **Link**                                                                                                                                                                                            |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Paper**                  | [![Paper](https://img.shields.io/badge/Read-Paper-blue.svg)](https://arxiv.org/pdf/2406.09390)                                                                                                      |
+| **Model Weights**          | [![Weights](https://img.shields.io/badge/Download-Model_Weights-green.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights)     |
+| **Multi-modal Features**         | [![Multi-modal Features](https://img.shields.io/badge/Download-Multimodal_Features-orange.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/multimodal_features) |
+| **Instruction Dataset**    | [![Instruction Dataset](https://img.shields.io/badge/Download-Instruction_Dataset-yellowgreen.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/instruction_data) |
+| **Data Curation**          | [![Data Curation](https://img.shields.io/badge/Read-Data_Curation-aquamarine.svg)](#data-curation-pipeline-) |
+| **Training**               | [![Training](https://img.shields.io/badge/Start-Training-crimson.svg)](#training-) |
+| **Offline Demo**           | [![Offline Demo](https://img.shields.io/badge/Run-Offline_Demo-teal.svg)](#running-demo-) |
+| **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) |
 
 
 ## LLAVIDAL Architecture ⚙️
