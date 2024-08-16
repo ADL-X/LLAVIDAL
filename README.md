@@ -17,7 +17,7 @@ This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Vid
 | **Data Curation**          | [![Data Curation](https://img.shields.io/badge/Read-Data_Curation-aquamarine.svg)](#data-curation-pipeline-) |
 | **Training**               | [![Training](https://img.shields.io/badge/Start-Training-crimson.svg)](#training-) |
 | **Offline Demo**           | [![Offline Demo](https://img.shields.io/badge/Run-Offline_Demo-teal.svg)](#running-demo-) |
-| **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) |
+| **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](#quantitative-evaluation-) |
 
 
 ## LLAVIDAL Architecture ⚙️
