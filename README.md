@@ -15,12 +15,12 @@ This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Vid
 | **Resource**               | **Link**                                                                                                                                                                                            |
 |----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Paper**                  | [![Paper](https://img.shields.io/badge/Read-Paper-blue.svg)](https://arxiv.org/pdf/2406.09390)                                                                                                      |
-| **Model Weights**          | [![Weights](https://img.shields.io/badge/Download-Model_Weights-green.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EulRwM1VLaNLsm7rYxBMFfoBvUzw5nddl_4U9qSrWFZfIA?e=iXSflE)     |
-| **Video Features**         | [![Video Features](https://img.shields.io/badge/Download-Video_Features-orange.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Ev529ctt_25ArNXTWqPF7NsBdM_m0A1SiIg9Qc1DKdCM2w?e=udCypF) |
-| **Instruction Dataset**    | [![Instruction Dataset](https://img.shields.io/badge/Access-Instruction_Dataset-yellowgreen.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EgbjE8ihBMBMjFyvYliaqQYBgRTqCEEgj8YH0JxJvl5nsQ?e=DxsZr6) |
-| **Pose Features**          | [![Pose Features](https://img.shields.io/badge/Download-Pose_Features-purple.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EuVbSocni-VAtHzfupCBmasBmBUaB9QGDEMWTHxBH_SApA?e=m0tDBP)     |
-| **Object Features**        | [![Object Features](https://img.shields.io/badge/Download-Object_Features-red.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/EnpaUynIshdDmKiPk5coSBABOVimC-dc46LHF55NOzpJ1g?e=0t646T) |
-| **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://studentuncc-my.sharepoint.com/:f:/g/personal/asinha13_charlotte_edu/Eu2URrInCM5NuNwwGQqddrEBlxSOwuRyJkh1JvPuza-13g?e=Ec50Bc) |
+| **Model Weights**          | [![Weights](https://img.shields.io/badge/Download-Model_Weights-green.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights)     |
+| **Video Features**         | [![Video Features](https://img.shields.io/badge/Download-Video_Features-orange.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip) |
+| **Instruction Dataset**    | [![Instruction Dataset](https://img.shields.io/badge/Access-Instruction_Dataset-yellowgreen.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/instruction_data) |
+| **Pose Features**          | [![Pose Features](https://img.shields.io/badge/Download-Pose_Features-purple.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/pose_features.zip)     |
+| **Object Features**        | [![Object Features](https://img.shields.io/badge/Download-Object_Features-red.svg)](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/object_features.zip) |
+| **Quantitative Evaluation**| [![Quantitative Evaluation](https://img.shields.io/badge/View-Quantitative_Evaluation-lightgrey.svg)](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) |
 
 
 ## LLAVIDAL Overview 👁️:
