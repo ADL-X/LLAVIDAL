@@ -20,8 +20,22 @@ pre {
 }
 """
 
-title = """<h1 align="center"><a href="https://www.dropbox.com/scl/fi/rhgo8el1106s4aqf97vdk/llavidal_logo_transparent.png?rlkey=t6dmzq6l0pj7gloyesah6oyhs&st=y902wjjp&dl=0"><img src="https://www.dropbox.com/scl/fi/rhgo8el1106s4aqf97vdk/llavidal_logo_transparent.png?rlkey=t6dmzq6l0pj7gloyesah6oyhs&st=y902wjjp&dl=0" alt="LLAVIDAL" border="0" style="margin: 0 auto; height: auto; width: auto;" /></a> </h1>
-"""
+
+
+title_markdown = ("""
+<div style="display: flex; justify-content: center; align-items: center; text-align: center;">
+  <a  style="margin-right: 100px; text-decoration: none; display: flex; align-items: center;">
+    <img src='/file=llavidal/demo/static/llavidal_logo.png'  alt="LLAVIDAL" style="max-width: 150px; height: auto;">
+  </a>
+  <div>
+    <h1 >LLAVIDAL: Large Language Vision Models for Daily Activities of Living </h1>
+  </div>
+    <a  style="margin-right: 20px; text-decoration: none; display: flex; align-items: right;">
+    <img src='/file=llavidal/demo/static/unc_logo.png'  alt="LLAVIDAL" style="max-width: 200px;height: auto;border-left-width: 0px;margin-left: 60px;">
+  </a>
+  
+</div>
+""")
 
 # title = """<h1 align="center"><a href="https://www.dropbox.com/s/papppkr5737mq4l/logo_design_nb2.png?dl=1"><img src="https://www.dropbox.com/s/papppkr5737mq4l/logo_design_nb2.png?dl=1" alt="llavidal" border="0" style="margin: 0 auto; width: 30%;" /></a> </h1>
 # """

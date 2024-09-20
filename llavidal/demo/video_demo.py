@@ -12,7 +12,7 @@ from llavidal.utils import (build_logger, violates_moderation, moderation_msg)
 from llavidal.demo.gradio_patch import Chatbot as grChatbot
 from llavidal.utils import disable_torch_init
 from llavidal.demo.chat import Chat
-from llavidal.demo.template import tos_markdown, css, title, disclaimer, Seafoam
+from llavidal.demo.template import tos_markdown, css, title_markdown, disclaimer, Seafoam
 from llavidal.eval.model_utils import initialize_model
 from llavidal.constants import *
 
@@ -153,7 +153,7 @@ def build_demo(embed_mode):
         first_run = gr.State()
 
         if not embed_mode:
-            gr.Markdown(title)
+            gr.Markdown(title_markdown)
             # gr.Markdown(description)
 
         with gr.Row():
