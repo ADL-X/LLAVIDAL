@@ -102,7 +102,6 @@ class LLAVIDALLlamaModel(LlamaModel):
             inputs_embeds = self.embed_tokens(input_ids)
 
         if (input_ids.shape[1] != 1 or self.training) and video_spatio_temporal_features is not None:
-
             video_features = self.mm_projector(video_spatio_temporal_features)
             dummy_video_features = torch.zeros(video_features.shape[1], 1024, device=inputs_embeds.device,
                                                dtype=inputs_embeds.dtype)
@@ -110,47 +109,15 @@ class LLAVIDALLlamaModel(LlamaModel):
 
             pose_features_projected = self.mm_projector_forpose(pose_features)
 
-            # with open('/data/rchakra6/concatenated_objects/057_057_video_115_object.pkl','rb') as f:
-            #     object_feat = pickle.load(f)
-
-            # object_features = torch.from_numpy(object_feat)
-            # object_feature_temp = None
-            # breakpoint()
-            
-
-            if object_features is not None:
-                # print("Object features shape:", object_features.shape)
-                # print("Expected input shape by the projector:", self.mm_projector_forobject.weight.shape[1])
-                if object_features.shape[1] > 8:
-                    n = object_features.shape[1] // 8
-                else:
-                    n=1
-                # print("SHAPE of OBJECT Features: ", object_features.shape)
-                object_features = object_features.view(n, 8, 512)
-
-                object_features = object_features.to(device=self.mm_projector_forobject.weight.device, dtype=torch.bfloat16)
-                object_features_projected = self.mm_projector_forobject(object_features)
-                # object_features_projected = object_features_projected.unsqueeze(0)
-                # print("Projected Object feature shape",object_features_projected.shape)
-                # object_feature_temp = object_features_projected
-            else:
-                n=1
-                # Handle the case where there are no object features
-                # print("No object features provided, using default")
-                # Example: create a default tensor that matches your expected dimensions and device
-                object_features = torch.zeros((1, 8, 512), device=input_ids.device)
-                object_features_projected = self.mm_projector_forobject(object_features)
-                # object_features_projected = object_features_projected.unsqueeze(0)
-                # object_features_projected = object_feature_temp
+            object_features_projected = self.mm_projector_forobject(object_features.float())
         
-            # breakpoint()
             new_input_embeds = []
             cur_video_idx = 0
 
             for cur_input_ids, cur_input_embeds in zip(input_ids, inputs_embeds):
+                # the current sample has no video
                 if (cur_input_ids == self.vision_config.vid_patch_token).sum() == 0:
-                    #raise NotImplementedError("Didnt expect this, the video was empty. If this error is raised then implement this for pose aswell")
-                    # Multimodal LLM, but the current sample is not multimodal
+                    raise NotImplementedError("Didnt expect this, the video was empty.")
                     cur_input_embeds = cur_input_embeds + (0. * dummy_video_features).sum()
                     new_input_embeds.append(cur_input_embeds)
                     cur_video_idx += 1
@@ -165,74 +132,87 @@ class LLAVIDALLlamaModel(LlamaModel):
                     if (cur_input_ids == self.vision_config.vid_start_token).sum() != (
                             cur_input_ids == self.vision_config.vid_end_token).sum():
                         raise ValueError("The number of video start tokens and video end tokens should be the same.")
+
+                    if (cur_input_ids == self.vision_config.pose_start_token).sum() != (
+                            cur_input_ids == self.vision_config.pose_end_token).sum():
+                        raise ValueError("The number of pose start tokens and pose end tokens should be the same.")
+
+                    if (cur_input_ids == self.vision_config.object_start_token).sum() != (
+                            cur_input_ids == self.vision_config.object_end_token).sum():
+                        raise ValueError("The number of object start tokens and object end tokens should be the same.")
+
                     video_start_tokens = torch.where(cur_input_ids == self.vision_config.vid_start_token)[0]
-                    for video_start_token_pos in video_start_tokens:
+
+                    for video_start_token_pos in video_start_tokens: # should always be 1 iteration
+                        pose_start_token_idx = torch.where(cur_input_ids == self.vision_config.pose_start_token)[0].item()
+                        pose_end_token_idx = torch.where(cur_input_ids == self.vision_config.pose_end_token)[0].item()
+
+                        object_start_token_idx = torch.where(cur_input_ids == self.vision_config.object_start_token)[0].item()
+                        object_end_token_idx = torch.where(cur_input_ids == self.vision_config.object_end_token)[0].item()
+
+
                         cur_video_features = video_features[cur_video_idx].to(device=cur_input_embeds.device)
-                        cur_object_features = object_features_projected.to(device=cur_input_embeds.device)
-                        # cur_object_features = object_features_projected[cur_video_idx].to(device=cur_input_embeds.device)
+                        cur_object_features = object_features_projected[cur_video_idx].to(device=cur_input_embeds.device)
                         cur_pose_features = pose_features_projected[cur_video_idx].to(device=cur_input_embeds.device)
 
                         num_patches = cur_video_features.shape[0]
                         num_pose_patches = cur_pose_features.shape[0] # the number of video features
-                        num_object_patches = cur_object_features.shape[1] # the number of object features
-                        
 
+                        # cant rely on the first dimension to get number of objects, it could be padded
+                        num_object_patches = (cur_input_ids == self.vision_config.object_patch_token).sum().item()
+                        num_objects_for_sample = num_object_patches // 8
+                        # num_object_patches = cur_object_features.shape[1]
+                        
+                        # quick check, if this is correct for video it should be the same for pose/object
                         if cur_input_ids[video_start_token_pos + num_patches + 1] != self.vision_config.vid_end_token:
                             raise ValueError("The video end token should follow the video start token.")
-                        if orig_embeds_params is not None:
-                            # ! Get object embeddings relative to video embedding
-                            
-                            #pose_end_token_idx = pose_start_token_idx + num_pose_patches + 1
-                            object_start_token_idx = video_start_token_pos + num_patches + 2
-                            # pose_start_token_idx = object_start_token_pos + num_object_patches + 2
-                            # pose_end_token_idx= pose_start_token_idx+ num_pose_patches +1
-                            
-                            
-                            # breakpoint()
-                            # object_end_token_idx = object_start_token_idx + num_object_patches + 1
-                            # k = 1
-                            # print("##############################################################")
-                            # print(print('INITIAL VALUE OF N = ', n))
-                            # breakpoint()
-                            object_embed = torch.empty(0, 4096)
-                            object_start_token_pos = video_start_token_pos + num_patches + 2
-                            
-                            while n > 0:
 
-                                # print("##############################################################")
-                                # print('VALUE OF N = ', n)
-                                # breakpoint()
+                        if orig_embeds_params is not None:
+                            object_start_token_pos = object_start_token_idx
+
+                            object_embed = torch.empty(0, 4096)
+                            
+                            n = 0
+                            while n < num_objects_for_sample:
+                                # add start token and first object features
                                 if object_embed.nelement() == 0:
                                     object_embed = torch.cat((
                                         cur_input_embeds[object_start_token_pos : object_start_token_pos + 1].detach(),
-                                        cur_object_features[n-1].view(8, 4096),
-                                        cur_input_embeds[object_start_token_pos + num_object_patches + 2 : object_start_token_pos + num_object_patches + 3].detach(),
+                                        cur_object_features[n*8:(n+1)*8]
                                     ), dim=0)
+                                # add the rest of the object features
                                 else:
-                                    new_embed = torch.cat((
-                                        cur_input_embeds[object_start_token_pos : object_start_token_pos + 1].detach(),
-                                        cur_object_features[n-1].view(8, 4096),
-                                        cur_input_embeds[object_start_token_pos + num_object_patches + 2 : object_start_token_pos + num_object_patches + 3].detach(),
+                                    object_embed = torch.cat((
+                                        object_embed,
+                                        cur_object_features[n*8:(n+1)*8]
                                     ), dim=0)
-                                    object_embed = torch.cat((object_embed, new_embed), dim=0)
-                                object_start_token_pos = object_start_token_pos + num_object_patches + 2
-                                n = n - 1
-                            
-                            pose_start_token_idx = object_start_token_pos 
-                            pose_end_token_idx= pose_start_token_idx+ num_pose_patches +1
-                            # breakpoint()
+
+                                n = n + 1
+
+                            # add object end token
+                            object_embed = torch.cat((
+                                object_embed,
+                                cur_input_embeds[object_end_token_idx: object_end_token_idx + 1].detach()
+                            ), dim=0)
+
+                            object_embed = object_embed.to(cur_input_embeds.device)
+
                             cur_new_input_embeds = torch.cat((cur_input_embeds[:video_start_token_pos].detach(), # everything before vid 
-                                                                cur_input_embeds[
-                                                                video_start_token_pos:video_start_token_pos + 1], # vid_start token
-                                                                cur_video_features,
-                                                                cur_input_embeds[video_start_token_pos + num_patches + 1:video_start_token_pos + num_patches + 2], # the video features
+                                                                cur_input_embeds[video_start_token_pos:video_start_token_pos + 1], # vid_start token
+                                                                cur_video_features, # the video features
+                                                                cur_input_embeds[video_start_token_pos + num_patches + 1:video_start_token_pos + num_patches + 2], # vid end token
                                                                 object_embed,
                                                                 cur_input_embeds[pose_start_token_idx:pose_start_token_idx + 1], # pose_start token
                                                                 cur_pose_features, # the pose features
                                                                 cur_input_embeds[pose_end_token_idx:pose_end_token_idx + 1], # pose_end token
-                                                                cur_input_embeds[
-                                                                pose_end_token_idx + 1:].detach()), # everything after pose
+                                                                cur_input_embeds[pose_end_token_idx + 1:].detach()), # everything after pose
                                                                 dim=0)
+
+                            # if cur_new_input_embeds.shape[0] != input_ids.shape[1]:
+                            #     print('Shapes dont match')
+                            #     breakpoint()
+
+                            assert cur_new_input_embeds.shape[0] == input_ids.shape[1], f"Shapes dont match: {cur_new_input_embeds.shape[0]} != {input_ids.shape[1]}"
 
                         else:
                             object_start_token_idx = video_start_token_pos + num_patches + 2
@@ -242,14 +222,15 @@ class LLAVIDALLlamaModel(LlamaModel):
                                                                 cur_video_features, # the video features
                                                                 cur_input_embeds[video_start_token_pos + num_patches + 1:object_start_token_idx], # everything after vid and before object
                                                                 cur_object_features, # the object features
-
                                                                 cur_input_embeds[object_end_token_idx :pose_start_token_idx],#everything after object and before pose
                                                                 cur_pose_features,
                                                                 cur_input_embeds[pose_start_token_idx+ num_pose_patches +1:]), dim=0) # everything after pose
+                        
                         cur_video_idx += 1
 
                     new_input_embeds.append(cur_new_input_embeds)
                 else:
+                    raise NotImplementedError("Only support multimodal training with modality prefixes.")
                     cur_video_features = video_features[cur_video_idx]
                     num_patches = cur_video_features.shape[0]
                     if (cur_input_ids == self.vision_config.vid_patch_token).sum() != num_patches:
@@ -271,7 +252,7 @@ class LLAVIDALLlamaModel(LlamaModel):
                     new_input_embeds.append(cur_new_input_embeds)
                     cur_video_idx += 1
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
-        # breakpoint() 
+        
         return super(LLAVIDALLlamaModel, self).forward(
             input_ids=None, attention_mask=attention_mask, past_key_values=past_key_values,
             inputs_embeds=inputs_embeds, use_cache=use_cache,
@@ -330,13 +311,12 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
             object_features=object_features,
             pose_features=pose_features
         )
-        #breakpoint()
+
         hidden_states = outputs[0]
         logits = self.lm_head(hidden_states)
 
         loss = None
         if labels is not None:
-            #breakpoint()
             # Shift so that tokens < n predict n
             shift_logits = logits[..., :-1, :].contiguous()
             shift_labels = labels[..., 1:].contiguous()
@@ -392,7 +372,7 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
                 "pose_features": kwargs.get("pose_features",None)
             }
         )
-        #breakpoint()
+
         return model_inputs
 
     def initialize_vision_tokenizer(self, mm_use_vid_start_end, tokenizer, device,
@@ -410,7 +390,7 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
                 [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN])
             vision_config.object_start_token, vision_config.object_end_token = tokenizer.convert_tokens_to_ids(
                 [DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN])
-            vision_config.object_start_token, vision_config.object_end_token = tokenizer.convert_tokens_to_ids(
+            vision_config.pose_start_token, vision_config.pose_end_token = tokenizer.convert_tokens_to_ids(
                 [DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN])
 
             if num_new_tokens > 0:

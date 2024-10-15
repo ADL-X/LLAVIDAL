@@ -43,7 +43,6 @@ class DataArguments:
     video_token_len: int = 0
     video_folder: Optional[str] = field(default=None)
     object_folder: Optional[str] = field(default=None)
-
     pose_folder: Optional[str] = field(default=None)  # Add this line
     frame_aspect_ratio: str = 'square'
 
@@ -168,11 +167,11 @@ def preprocess_multimodal(
     
     video_token_len = cur_video_token_len
     pose_token_len = cur_pose_token_len
-    object_token_len = cur_object_token_len
-    num_objects = object_token_len//8
+    object_token_len = cur_object_token_len # first dim in object features
+    num_objects = object_token_len // 8 # 8 frames per object
     if not is_multimodal:
         return sources
-
+    
     for source in sources:
         if multimodal_cfg['sep_video_conv_front']: # Dominick: In default cfg this is false
             #raise NotImplementedError("Not implemented for poses yet")
@@ -185,23 +184,22 @@ def preprocess_multimodal(
             if multimodal_cfg['use_vid_start_end']:
                 replace_token = DEFAULT_VID_START_TOKEN + replace_token + DEFAULT_VID_END_TOKEN
             sentence["value"] = sentence["value"].replace(DEFAULT_VIDEO_TOKEN, replace_token)
-        # breakpoint()    
-        ## Adding object token patches   
-        for sentence in source:
-            if num_objects > 1:
-                sentence["value"] = sentence["value"].replace(DEFAULT_OBJECT_TOKEN, DEFAULT_OBJECT_TOKEN*num_objects)
 
-            replace_token = DEFAULT_OBJECT_PATCH_TOKEN * (object_token_len // num_objects)
-            if multimodal_cfg['use_vid_start_end']: # use video config for object as well
+        ## Adding object token patches
+        for sentence in source:
+            replace_token = DEFAULT_OBJECT_PATCH_TOKEN * object_token_len
+
+            if multimodal_cfg['use_vid_start_end']: # are we using modality prefix?
                 replace_token = DEFAULT_OBJECT_START_TOKEN + replace_token + DEFAULT_OBJECT_END_TOKEN
+
             sentence["value"] = sentence["value"].replace(DEFAULT_OBJECT_TOKEN, replace_token)
 
         for sentence in source:
             replace_token = DEFAULT_POSE_PATCH_TOKEN * pose_token_len
-            if multimodal_cfg['use_vid_start_end']: # use video config for pose as well
+            if multimodal_cfg['use_vid_start_end']: # are we using modality prefix?
                 replace_token = DEFAULT_POSE_START_TOKEN + replace_token + DEFAULT_POSE_END_TOKEN
             sentence["value"] = sentence["value"].replace(DEFAULT_POSE_TOKEN, replace_token)
-        # breakpoint()    
+
     return sources
 
 
@@ -213,11 +211,11 @@ def preprocess_v1(
 ) -> Dict:
     conv = conversation_lib.default_conversation.copy()
     roles = {"human": conv.roles[0], "gpt": conv.roles[1]}
-    # breakpoint()
+
     # Apply prompt templates
     conversations = []
     for i, source in enumerate(sources):
-        #breakpoint()
+
         if roles[source[0]["from"]] != conv.roles[0]:
             # Skip the first one if it is not from human
             source = source[1:]
@@ -228,7 +226,7 @@ def preprocess_v1(
             assert role == conv.roles[j % 2], f"{i}"
             conv.append_message(role, sentence["value"])
         conversations.append(conv.get_prompt())
-    # breakpoint()
+
     # Tokenize conversations
     input_ids = tokenizer(
         conversations,
@@ -245,7 +243,7 @@ def preprocess_v1(
     sep = conv.sep + conv.roles[1] + ": "
     for conversation, target in zip(conversations, targets):
         total_len = int(target.ne(tokenizer.pad_token_id).sum())
-        # breakpoint()
+
         rounds = conversation.split(conv.sep2)
         cur_len = 1
         target[:cur_len] = IGNORE_INDEX
@@ -272,7 +270,7 @@ def preprocess_v1(
                     f"WARNING: tokenization mismatch: {cur_len} vs. {total_len}."
                     f" (ignored)"
                 )
-    # breakpoint()
+
     return dict(
         input_ids=input_ids,
         labels=targets,
@@ -435,7 +433,7 @@ class LazySupervisedDataset(Dataset):
             sources = [sources]
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
 
-        if 'video' in sources[0]: # Assuming pose is only present if a video is present
+        if 'video' in sources[0]:
             video_file = self.list_data_dict[i]['video']
             video_folder = self.multimodal_cfg['video_folder']
             with open(f"{video_folder}/{video_file}", "rb") as f:
@@ -443,18 +441,19 @@ class LazySupervisedDataset(Dataset):
 
             # print(f"LOADED FILE {video_folder}/{video_file}. FEATURE SHAPE:{features.shape} " )
             # print("##################################################################################")
+        
         if 'object' in sources[0]: # Assuming object data is present
             object_file = self.list_data_dict[i]['object']
             object_folder = self.multimodal_cfg['object_folder']
             if os.path.exists(f"{object_folder}/{object_file}"):
                 with open(f"{object_folder}/{object_file}", "rb") as f:
                     object_features = pickle.load(f)
-                    object_features = object_features.reshape(-1, 512)  # Reshape to [8, 512] if it's not already
-                    print(f"Loaded {object_folder}/{object_file} object features shape:", object_features.shape)
-
+                    object_features = object_features.reshape(-1, 512)  # Reshape to [num_objects*8, 512] if it's not already
+                    object_features = torch.tensor(object_features, dtype=torch.float32)
+                    # print(f"Loaded {object_folder}/{object_file} object features shape:", object_features.shape)
 
             else:
-                print(f"No object data found for {object_file}, using zero tensor as placeholder.")
+                # print(f"No object data found for {object_file}, using zero tensor as placeholder.")
                 object_features = torch.zeros((8, 512), dtype=torch.float32)  # Create a zero tensor of shape [8, 512]
     
         if 'pose' in sources[0]:
@@ -463,10 +462,10 @@ class LazySupervisedDataset(Dataset):
             if os.path.exists(f"{pose_folder}/{pose_file}"):
                 with open(f"{pose_folder}/{pose_file}", "rb") as f:
                     pose_features = pickle.load(f)
-                    
+                    pose_features = torch.tensor(pose_features, dtype=torch.float32)                    
             else:
                
-                logging.error(f"Pose file not found: {pose_folder}/{pose_file}")
+                # logging.error(f"Pose file not found: {pose_folder}/{pose_file}")
                 pose_features = torch.zeros((256, 216), dtype=torch.float32)  # Placeholder tensor
 
         
@@ -488,8 +487,8 @@ class LazySupervisedDataset(Dataset):
         if 'pose' in self.list_data_dict[i]:
             data_dict["pose"] = pose_features
         
-        if os.path.exists(f"{object_folder}/{object_file}"):
-            data_dict["object"] = torch.tensor(object_features)
+        if 'object' in self.list_data_dict[i]:
+            data_dict["object"] = object_features
     
         return data_dict
 
@@ -503,7 +502,7 @@ class DataCollatorForSupervisedDataset(object):
     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
         input_ids, labels = tuple([instance[key] for instance in instances]
                                   for key in ("input_ids", "labels"))
-        # breakpoint()
+        
         input_ids = torch.nn.utils.rnn.pad_sequence(
             input_ids,
             batch_first=True,
@@ -520,30 +519,28 @@ class DataCollatorForSupervisedDataset(object):
         if 'video' in instances[0]: # TODO: Assuming pose is only present if video is present
             features = [torch.tensor(instance['video']) for instance in instances]
             if 'pose' in instances[0]:
-                pose_features = [torch.tensor(instance['pose']) for instance in instances]
+                pose_features = [instance['pose'] for instance in instances]
                 if all(x is not None and x.shape == pose_features[0].shape for x in pose_features):
                     batch['pose_features'] = torch.stack(pose_features)
                 else:
                     batch['pose_features'] = pose_features
-            # breakpoint()
+
             if all(x is not None and x.shape == features[0].shape for x in features):
                 batch['video_spatio_temporal_features'] = torch.stack(features)
             else:
                 batch['video_spatio_temporal_features'] = features
 
-            object_features = [torch.tensor(instance['object']) for instance in instances if 'object' in instance]
+            object_features = [instance['object'] for instance in instances if 'object' in instance]
             
-
-        
+            # Pad the object features to the same length when videos have varying numbers of objects being tracked
+            # NOTE: the padded features should not be used as input to the model, they should be spliced off in llavidal_pose_object
+            # before being passed to the model. This is only so we can batch the data.
             if object_features:
-                # Pad sequences to handle variable lengths
                 batch['object_features'] = torch.nn.utils.rnn.pad_sequence(object_features, batch_first=True, padding_value=self.tokenizer.pad_token_id) 
             else:
                 # If no valid object features are present, you might add a placeholder or handle it differently
                 logging.info("No valid object features found among the batch instances.")
 
-
-        # # breakpoint() 
         return batch
 
 
@@ -602,16 +599,22 @@ def train():
     data_args.video_token_len = model_vision_dict['video_token_len']
     data_args.is_multimodal = True
 
+    projectors = [model.get_model().mm_projector, model.get_model().mm_projector_forobject, model.get_model().mm_projector_forpose]
+
     model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
     if model_args.tune_mm_mlp_adapter:
         model.requires_grad_(False)
-        for p in model.get_model().mm_projector.parameters():
-            p.requires_grad = True
+
+        for projector in projectors:
+            for p in projector.parameters():
+                p.requires_grad = True
 
     model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
     if training_args.freeze_mm_mlp_adapter:
-        for p in model.get_model().mm_projector.parameters():
-            p.requires_grad = False
+
+        for projector in projectors:
+            for p in projector.parameters():
+                p.requires_grad = False
 
     model.config.mm_use_vid_start_end = data_args.mm_use_vid_start_end = model_args.mm_use_vid_start_end
     vision_config.use_vid_start_end = training_args.use_vid_start_end = model_args.mm_use_vid_start_end
