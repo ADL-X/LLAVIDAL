@@ -31,7 +31,7 @@ class LlavidalTrainer(Trainer):
                 _state_dict = model_to_save.state_dict()
 
             weight_to_save = {}
-            keys_to_match = ['mm_projector', 'embed_tokens', 'embed_in']
+            keys_to_match = ['mm_projector', 'embed_tokens', 'embed_in'] # as long as mm_projector is in the key, it will be saved
             for k, v in _state_dict.items():
                 if any(key_match in k for key_match in keys_to_match):
                     weight_to_save[k] = v
