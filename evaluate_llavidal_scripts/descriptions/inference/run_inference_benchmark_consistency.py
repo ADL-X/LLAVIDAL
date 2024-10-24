@@ -47,11 +47,18 @@ def run_inference(args):
     video_formats = ['.mp4', '.avi', '.mov', '.mkv']
 
     # Iterate over each sample in the ground truth file
-    for sample in tqdm(gt_contents):
-        video_name = sample['video_name']
+    for video_id, sample in tqdm(gt_contents.items()):
+        video_name = video_id
         sample_set = sample
+        sample_set['video_name'] = video_name
         question_1 = sample['Q1']
         question_2 = sample['Q2']
+
+    # for sample in tqdm(gt_contents):
+    #     video_name = sample['video_name']
+    #     sample_set = sample
+    #     question_1 = sample['Q1']
+    #     question_2 = sample['Q2']
 
         # Load the video file
         for fmt in video_formats:  # Added this line

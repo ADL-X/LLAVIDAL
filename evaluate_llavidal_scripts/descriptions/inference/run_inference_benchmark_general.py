@@ -51,7 +51,7 @@ def run_inference(args):
     for sample in tqdm(gt_contents):
         video_name = sample['video_name']
         sample_set = sample
-        question = fixed_question
+        question = sample['Q']
 
         # Load the video file
         for fmt in video_formats:  # Added this line

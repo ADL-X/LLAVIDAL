@@ -49,25 +49,37 @@ class LLAVIDALLlamaModel(LlamaModel):
         if hasattr(config, "mm_vision_tower"):
             self.vision_config = VisionConfig()
 
-        if hasattr(config, "use_mm_proj"):
-            self.mm_projector = nn.Linear(config.mm_hidden_size, config.hidden_size)
-            self.mm_projector_forpose = nn.Linear(self.vision_config.hidden_size_pose, config.hidden_size) # ! There are a lot of lines doing things to mm_projector (above). I am not implementing them for mm_projector_forpose for now
-
-    def initialize_vision_modules(self, pretrain_mm_mlp_adapter=None, tune_mm_mlp_adapter=False):
+    def initialize_vision_modules(self, modalities_to_use, pretrain_mm_mlp_adapter=None, tune_mm_mlp_adapter=False):
         vision_config = self.vision_config
         num_patches = (vision_config.frame_size // vision_config.patch_size) ** 2
 
         self.config.use_mm_proj = True
-        self.config.mm_hidden_size = vision_config.hidden_size
-        self.config.mm_hidden_size_pose = vision_config.hidden_size_pose
 
-        if not hasattr(self, 'mm_projector'):
-            self.mm_projector = nn.Linear(vision_config.hidden_size, self.config.hidden_size)
-
+        # Load the pretrained weights for the multimodal projector
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
-            self.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'pose' not in k})
-            self.mm_projector_forpose.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'pose' in k})
+
+        # intialize the multimodal projectors and load weights if passed
+        if modalities_to_use['video']:
+            self.mm_projector = nn.Linear(vision_config.hidden_size, self.config.hidden_size)
+            self.config.mm_hidden_size = vision_config.hidden_size
+
+            if pretrain_mm_mlp_adapter is not None:
+                self.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if ('pose' not in k and 'object' not in k)})
+
+        if modalities_to_use['object']:
+            self.mm_projector_forobject = nn.Linear(vision_config.hidden_size_object, self.config.hidden_size)
+            self.config.mm_hidden_size_pose = vision_config.hidden_size_pose
+
+            if pretrain_mm_mlp_adapter is not None:
+                self.mm_projector_forobject.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'object' in k})
+
+        if modalities_to_use['pose']:
+            self.mm_projector_forpose = nn.Linear(vision_config.hidden_size_pose, self.config.hidden_size)
+            self.config.mm_hidden_size_object = vision_config.hidden_size_object
+
+            if pretrain_mm_mlp_adapter is not None:
+                self.mm_projector_forpose.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'pose' in k})
 
         return dict(
             video_token_len=num_patches,
@@ -85,8 +97,10 @@ class LLAVIDALLlamaModel(LlamaModel):
             output_hidden_states: Optional[bool] = None,
             video_spatio_temporal_features: Optional[torch.FloatTensor] = None,
             pose_features: Optional[torch.FloatTensor] = None,
+            object_features:Optional[torch.FloatTensor] = None,
             return_dict: Optional[bool] = None,
     ) -> Union[Tuple, BaseModelOutputWithPast]:
+        # print('embed_tokens.weight.requires_grad = ', self.model.embed_tokens.weight.requires_grad)
         orig_embeds_params = getattr(self, 'orig_embeds_params', None)
         # if orig_embeds_params is not None:
         #     orig_embeds_params = orig_embeds_params[0]
@@ -96,112 +110,160 @@ class LLAVIDALLlamaModel(LlamaModel):
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
 
-        if (input_ids.shape[1] != 1 or self.training) and video_spatio_temporal_features is not None:
-            video_features = self.mm_projector(video_spatio_temporal_features)
-            dummy_video_features = torch.zeros(video_features.shape[1], 1024, device=inputs_embeds.device,
-                                               dtype=inputs_embeds.dtype)
-            dummy_video_features = self.mm_projector(dummy_video_features)
+        if (input_ids.shape[1] != 1 or self.training):
+            if video_spatio_temporal_features is not None:
+                video_features = self.mm_projector(video_spatio_temporal_features)
+                # dummy_video_features = torch.zeros(video_features.shape[1], 1024, device=inputs_embeds.device,
+                #                                 dtype=inputs_embeds.dtype)
+                # dummy_video_features = self.mm_projector(dummy_video_features)
 
-            pose_features_projected = self.mm_projector_forpose(pose_features)
+            if object_features is not None:
+                object_features_projected = self.mm_projector_forobject(object_features.float())
+
+            if pose_features is not None:
+                pose_features_projected = self.mm_projector_forpose(pose_features)
         
             new_input_embeds = []
             cur_video_idx = 0
 
             for cur_input_ids, cur_input_embeds in zip(input_ids, inputs_embeds):
-                # the current sample has no video
-                if (cur_input_ids == self.vision_config.vid_patch_token).sum() == 0:
-                    raise NotImplementedError("Didnt expect this, the video was empty.")
-                    cur_input_embeds = cur_input_embeds + (0. * dummy_video_features).sum()
-                    new_input_embeds.append(cur_input_embeds)
-                    cur_video_idx += 1
-                    continue
-                
                 '''
                 Initially, the input_embeds are the embeddings of the tokens in the input_ids. This means that the special video and pose tokens (e.g., <vid_patch> and <pose_start>) were processed like words (and the embeddings are the representations from the model).
 
                 Below, we replace the embeddings of the video and pose tokens with the actual video and pose features. We do this by finding the positions of the video and pose tokens in the input_ids, and then replacing the embeddings of the tokens at those positions with the video and pose features.
                 '''
-                if self.vision_config.use_vid_start_end: # This is true in the config we use
-                    if (cur_input_ids == self.vision_config.vid_start_token).sum() != (
-                            cur_input_ids == self.vision_config.vid_end_token).sum():
-                        raise ValueError("The number of video start tokens and video end tokens should be the same.")
+                # if self.vision_config.use_vid_start_end: # Are we using modality token prefixes?
+                start_token_positions, end_token_positions = [], []
+                features_to_append = [] # will store the features to append to the input embeddings
 
-                    if (cur_input_ids == self.vision_config.pose_start_token).sum() != (
-                            cur_input_ids == self.vision_config.pose_end_token).sum():
-                        raise ValueError("The number of pose start tokens and pose end tokens should be the same.")
+                '''
+                Add video features
+                '''
+                if video_spatio_temporal_features is not None:
+                    cur_video_features = video_features[cur_video_idx].to(device=cur_input_embeds.device)
+                    
+                    if self.vision_config.use_vid_start_end: # append start+end tokens and features
+                        video_start_token_pos = torch.where(cur_input_ids == self.vision_config.vid_start_token)[0].item()
+                        video_end_token_pos = torch.where(cur_input_ids == self.vision_config.vid_end_token)[0].item()
 
+                        features_to_append.append(cur_input_embeds[video_start_token_pos:video_start_token_pos + 1])
+                        features_to_append.append(cur_video_features)
+                        features_to_append.append(cur_input_embeds[video_end_token_pos:video_end_token_pos + 1])
+                    else: # only append features
+                        video_start_token_pos = torch.where(cur_input_ids == self.vision_config.vid_patch_token)[0][0].item()
+                        video_end_token_pos = torch.where(cur_input_ids == self.vision_config.vid_patch_token)[0][-1].item()
+                        features_to_append.append(cur_video_features)
 
-                    video_start_tokens = torch.where(cur_input_ids == self.vision_config.vid_start_token)[0]
+                    start_token_positions.append(video_start_token_pos)
+                    end_token_positions.append(video_end_token_pos)
 
-                    for video_start_token_pos in video_start_tokens: # should always be 1 iteration
+                '''
+                Add object features
+                '''
+                if object_features is not None:
+                    cur_object_features = object_features_projected[cur_video_idx].to(device=cur_input_embeds.device)
+                    # cant rely on the first dimension to get number of objects, it could be padded
+                    num_object_patches = (cur_input_ids == self.vision_config.object_patch_token).sum().item()
+                    num_objects_for_sample = num_object_patches // 8
+
+                    if self.vision_config.use_vid_start_end:
+                        object_start_token_idx = torch.where(cur_input_ids == self.vision_config.object_start_token)[0].item()
+                        object_end_token_idx = torch.where(cur_input_ids == self.vision_config.object_end_token)[0].item()
+                    else:
+                        object_start_token_idx = torch.where(cur_input_ids == self.vision_config.object_patch_token)[0][0].item()
+                        object_end_token_idx = torch.where(cur_input_ids == self.vision_config.object_patch_token)[0][-1].item()
+
+                    # incase there are tokens between the end of the last modality and the start of the current modality
+                    # this happens when use_modality_string_prefix is True
+                    if len(start_token_positions) > 0 and object_start_token_idx - end_token_positions[-1] > 1:
+                        features_to_append.append(cur_input_embeds[end_token_positions[-1]+1:object_start_token_idx])
+
+                    start_token_positions.append(object_start_token_idx)
+                    end_token_positions.append(object_end_token_idx)
+
+                    # build object feature tensor
+                    object_embed = torch.empty(0, 4096)
+                    
+                    n = 0
+                    while n < num_objects_for_sample:
+                        if object_embed.nelement() == 0:
+                            if self.vision_config.use_vid_start_end: # add start token and features for 1st object
+                                object_embed = torch.cat((
+                                    cur_input_embeds[object_start_token_idx : object_start_token_idx + 1],
+                                    cur_object_features[n*8:(n+1)*8]
+                                ), dim=0)
+                            else: # add features for 1st object
+                                object_embed = cur_object_features[n*8:(n+1)*8]
+                        # add the rest of the object features
+                        else:
+                            object_embed = torch.cat((
+                                object_embed,
+                                cur_object_features[n*8:(n+1)*8]
+                            ), dim=0)
+
+                        n = n + 1
+
+                    if self.vision_config.use_vid_start_end: # add object end token
+                        object_embed = torch.cat((
+                            object_embed,
+                            cur_input_embeds[object_end_token_idx: object_end_token_idx + 1]
+                        ), dim=0)
+
+                    object_embed = object_embed.to(cur_input_embeds.device)
+
+                    features_to_append.append(object_embed)
+                
+                '''
+                Add pose features
+                '''
+                if pose_features is not None:
+                    cur_pose_features = pose_features_projected[cur_video_idx].to(device=cur_input_embeds.device)
+
+                    if self.vision_config.use_vid_start_end:
                         pose_start_token_idx = torch.where(cur_input_ids == self.vision_config.pose_start_token)[0].item()
                         pose_end_token_idx = torch.where(cur_input_ids == self.vision_config.pose_end_token)[0].item()
-
-                        cur_video_features = video_features[cur_video_idx].to(device=cur_input_embeds.device)
-                        cur_pose_features = pose_features_projected[cur_video_idx].to(device=cur_input_embeds.device)
-
-                        num_patches = cur_video_features.shape[0]
-                        num_pose_patches = cur_pose_features.shape[0] # the number of video features
-                        
-                        # quick check, if this is correct for video it should be the same for pose/object
-                        if cur_input_ids[video_start_token_pos + num_patches + 1] != self.vision_config.vid_end_token:
-                            raise ValueError("The video end token should follow the video start token.")
-
-                        if orig_embeds_params is not None:
-                            cur_new_input_embeds = torch.cat((cur_input_embeds[:video_start_token_pos].detach(), # everything before vid 
-                                                                cur_input_embeds[video_start_token_pos:video_start_token_pos + 1], # vid_start token
-                                                                cur_video_features, # the video features
-                                                                cur_input_embeds[video_start_token_pos + num_patches + 1:video_start_token_pos + num_patches + 2], # vid end token
-                                                                cur_input_embeds[pose_start_token_idx:pose_start_token_idx + 1], # pose_start token
-                                                                cur_pose_features, # the pose features
-                                                                cur_input_embeds[pose_end_token_idx:pose_end_token_idx + 1], # pose_end token
-                                                                cur_input_embeds[pose_end_token_idx + 1:].detach()), # everything after pose
-                                                                dim=0)
-
-                            # if cur_new_input_embeds.shape[0] != input_ids.shape[1]:
-                            #     print('Shapes dont match')
-                            #     breakpoint()
-
-                            assert cur_new_input_embeds.shape[0] == input_ids.shape[1], f"Shapes dont match: {cur_new_input_embeds.shape[0]} != {input_ids.shape[1]}"
-
-                        else:
-                            raise NotImplementedError()
-                            object_start_token_idx = video_start_token_pos + num_patches + 2
-                            object_end_token_idx = object_start_token_idx + num_object_patches + 1
-                            pose_start_token_idx = object_end_token_idx + num_object_patches+2
-                            cur_new_input_embeds = torch.cat((cur_input_embeds[:video_start_token_pos + 1], # everything before vid
-                                                                cur_video_features, # the video features
-                                                                cur_input_embeds[video_start_token_pos + num_patches + 1:object_start_token_idx], # everything after vid and before object
-                                                                cur_object_features, # the object features
-                                                                cur_input_embeds[object_end_token_idx :pose_start_token_idx],#everything after object and before pose
-                                                                cur_pose_features,
-                                                                cur_input_embeds[pose_start_token_idx+ num_pose_patches +1:]), dim=0) # everything after pose
-                        
-                        cur_video_idx += 1
-
-                    new_input_embeds.append(cur_new_input_embeds)
-                else:
-                    raise NotImplementedError("Only support multimodal training with modality prefixes.")
-                    cur_video_features = video_features[cur_video_idx]
-                    num_patches = cur_video_features.shape[0]
-                    if (cur_input_ids == self.vision_config.vid_patch_token).sum() != num_patches:
-                        raise ValueError(
-                            "The number of video patch tokens should be the same as the number of video patches.")
-                    masked_indices = torch.where(cur_input_ids == self.vision_config.vid_patch_token)[0]
-                    mask_index_start = masked_indices[0]
-                    if (masked_indices != torch.arange(mask_index_start, mask_index_start + num_patches,
-                                                       device=masked_indices.device, dtype=masked_indices.dtype)).any():
-                        raise ValueError("The video patch tokens should be consecutive.")
-                    if orig_embeds_params is not None:
-                        cur_new_input_embeds = torch.cat((cur_input_embeds[:mask_index_start].detach(),
-                                                          cur_video_features,
-                                                          cur_input_embeds[mask_index_start + num_patches:].detach()),
-                                                         dim=0)
                     else:
-                        cur_new_input_embeds = torch.cat((cur_input_embeds[:mask_index_start], cur_video_features,
-                                                          cur_input_embeds[mask_index_start + num_patches:]), dim=0)
-                    new_input_embeds.append(cur_new_input_embeds)
-                    cur_video_idx += 1
+                        pose_start_token_idx = torch.where(cur_input_ids == self.vision_config.pose_patch_token)[0][0].item()
+                        pose_end_token_idx = torch.where(cur_input_ids == self.vision_config.pose_patch_token)[0][-1].item()
+
+                    # incase there are tokens between the end of the last modality and the start of the current modality
+                    # this happens when use_modality_string_prefix is True
+                    if len(start_token_positions) > 0 and pose_start_token_idx - end_token_positions[-1] > 1:
+                        features_to_append.append(cur_input_embeds[end_token_positions[-1]+1:pose_start_token_idx])
+
+                    start_token_positions.append(pose_start_token_idx)
+                    end_token_positions.append(pose_end_token_idx)
+
+                    # add start token
+                    if self.vision_config.use_vid_start_end:
+                        features_to_append.append(cur_input_embeds[pose_start_token_idx:pose_start_token_idx + 1])
+
+                    features_to_append.append(cur_pose_features)
+
+                    # add end token
+                    if self.vision_config.use_vid_start_end:
+                        features_to_append.append(cur_input_embeds[pose_end_token_idx:pose_end_token_idx + 1])
+
+                # error checking
+                assert len(start_token_positions) != 0 and len(end_token_positions) != 0, "There should be at least one modality token. Cant train with only text"
+                assert len(start_token_positions) == len(end_token_positions), "The number of start and end tokens should be the same."
+
+                earliest_start_token_pos = min(start_token_positions)
+                latest_end_token_pos = max(end_token_positions)
+
+                features_to_append = torch.cat(features_to_append, dim=0)
+
+                cur_new_input_embeds = torch.cat((cur_input_embeds[:earliest_start_token_pos].detach(), # everything before first modality token
+                                                    features_to_append, # the features
+                                                    cur_input_embeds[latest_end_token_pos + 1:].detach()), # everything after last modality token
+                                                    dim=0)
+
+                assert cur_new_input_embeds.shape[0] == input_ids.shape[1], f"Shapes dont match: {cur_new_input_embeds.shape[0]} != {input_ids.shape[1]}"
+                
+                cur_video_idx += 1
+
+                new_input_embeds.append(cur_new_input_embeds)
+
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
         
         return super(LLAVIDALLlamaModel, self).forward(
@@ -238,6 +300,7 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
             output_attentions: Optional[bool] = None,
             output_hidden_states: Optional[bool] = None,
             video_spatio_temporal_features: Optional[torch.FloatTensor] = None,
+            object_features: Optional[torch.FloatTensor] = None,
             pose_features: Optional[torch.FloatTensor] = None,
             return_dict: Optional[bool] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
@@ -258,6 +321,7 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             video_spatio_temporal_features=video_spatio_temporal_features,
+            object_features=object_features,
             pose_features=pose_features
         )
 
@@ -328,8 +392,7 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
                                     tune_mm_mlp_adapter=False, pretrain_mm_mlp_adapter=None):
         vision_config = self.get_model().vision_config
         vision_config.use_vid_start_end = mm_use_vid_start_end
-        tokenizer.add_tokens([DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN], special_tokens=True)
-        tokenizer.add_tokens([DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN], special_tokens=True) # ! Add OBJECT tokens
+        tokenizer.add_tokens([DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN], special_tokens=True)
         self.resize_token_embeddings(len(tokenizer))
 
         if mm_use_vid_start_end:
@@ -362,18 +425,19 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
                 for p in self.get_output_embeddings().parameters():
                     p.requires_grad = False
 
-            # if pretrain_mm_mlp_adapter:
-            #     mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
-            #     embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
-            #     assert num_new_tokens == 2
-            #     if input_embeddings.shape == embed_tokens_weight.shape:
-            #         input_embeddings[-num_new_tokens:] = embed_tokens_weight[-num_new_tokens:]
-            #     elif embed_tokens_weight.shape[0] == num_new_tokens:
-            #         input_embeddings[-num_new_tokens:] = embed_tokens_weight
-            #     else:
-            #         raise ValueError(
-            #             f"Unexpected embed_tokens_weight shape. Pretrained: {embed_tokens_weight.shape}. "
-            #             f"Current: {input_embeddings.shape}. Numer of new tokens: {num_new_tokens}.")
+            if pretrain_mm_mlp_adapter:
+                mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
+                embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
+                input_embeddings = embed_tokens_weight
+                # assert num_new_tokens == 2
+                # if input_embeddings.shape == embed_tokens_weight.shape:
+                #     input_embeddings[-num_new_tokens:] = embed_tokens_weight[-num_new_tokens:]
+                # elif embed_tokens_weight.shape[0] == num_new_tokens:
+                #     input_embeddings[-num_new_tokens:] = embed_tokens_weight
+                # else:
+                #     raise ValueError(
+                #         f"Unexpected embed_tokens_weight shape. Pretrained: {embed_tokens_weight.shape}. "
+                #         f"Current: {input_embeddings.shape}. Numer of new tokens: {num_new_tokens}.")
 
         vision_config.vid_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_VIDEO_PATCH_TOKEN])[0]
         vision_config.object_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_OBJECT_PATCH_TOKEN])[0]
