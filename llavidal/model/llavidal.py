@@ -34,6 +34,12 @@ class VisionConfig:
         self.vid_start_token = None
         self.vid_end_token = None
         self.vid_patch_token = None
+        self.object_start_token = None
+        self.object_end_token = None
+        self.object_patch_token = None
+        self.pose_start_token = None
+        self.pose_end_token = None
+        self.pose_patch_token = None
 
 
 class LLAVIDALConfig(LlamaConfig):
@@ -43,11 +49,24 @@ class LLAVIDALConfig(LlamaConfig):
 class LLAVIDALLlamaModel(LlamaModel):
     config_class = LLAVIDALConfig
 
-    def __init__(self, config: LlamaConfig, mm_vision_tower=None, mm_hidden_size=None):  # TODO: Remove unused params
+    def __init__(self, config: LlamaConfig, modality_args, mm_vision_tower=None, mm_hidden_size=None):  # TODO: Remove unused params
         super(LLAVIDALLlamaModel, self).__init__(config)
 
         if hasattr(config, "mm_vision_tower"):
             self.vision_config = VisionConfig()
+
+        # initialize the projectors
+        if hasattr(config, "use_mm_proj") and modality_args is not None:
+            if modality_args['video']:
+                self.mm_projector = nn.Linear(config.mm_hidden_size, config.hidden_size)
+
+            if modality_args['object']:
+                self.mm_projector_forobject = nn.Linear(self.vision_config.hidden_size_object, self.config.hidden_size)
+
+            if modality_args['pose']:
+                self.mm_projector_forpose = nn.Linear(self.vision_config.hidden_size_pose, self.config.hidden_size)
+        else: # at inference
+            self.mm_projector = nn.Linear(config.mm_hidden_size, config.hidden_size)
 
     def initialize_vision_modules(self, modalities_to_use, pretrain_mm_mlp_adapter=None, tune_mm_mlp_adapter=False):
         vision_config = self.vision_config
@@ -59,27 +78,18 @@ class LLAVIDALLlamaModel(LlamaModel):
         if pretrain_mm_mlp_adapter is not None:
             mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
 
-        # intialize the multimodal projectors and load weights if passed
-        if modalities_to_use['video']:
-            self.mm_projector = nn.Linear(vision_config.hidden_size, self.config.hidden_size)
-            self.config.mm_hidden_size = vision_config.hidden_size
+            # intialize the multimodal projectors and load weights if passed
+            if modalities_to_use['video']:
+                if pretrain_mm_mlp_adapter is not None:
+                    self.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if ('pose' not in k and 'object' not in k)})
 
-            if pretrain_mm_mlp_adapter is not None:
-                self.mm_projector.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if ('pose' not in k and 'object' not in k)})
+            if modalities_to_use['object']:
+                if pretrain_mm_mlp_adapter is not None:
+                    self.mm_projector_forobject.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'object' in k})
 
-        if modalities_to_use['object']:
-            self.mm_projector_forobject = nn.Linear(vision_config.hidden_size_object, self.config.hidden_size)
-            self.config.mm_hidden_size_pose = vision_config.hidden_size_pose
-
-            if pretrain_mm_mlp_adapter is not None:
-                self.mm_projector_forobject.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'object' in k})
-
-        if modalities_to_use['pose']:
-            self.mm_projector_forpose = nn.Linear(vision_config.hidden_size_pose, self.config.hidden_size)
-            self.config.mm_hidden_size_object = vision_config.hidden_size_object
-
-            if pretrain_mm_mlp_adapter is not None:
-                self.mm_projector_forpose.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'pose' in k})
+            if modalities_to_use['pose']:
+                if pretrain_mm_mlp_adapter is not None:
+                    self.mm_projector_forpose.load_state_dict({k.split('.')[-1]: v for k, v in mm_projector_weights.items() if 'pose' in k})
 
         return dict(
             video_token_len=num_patches,
@@ -118,7 +128,7 @@ class LLAVIDALLlamaModel(LlamaModel):
                 # dummy_video_features = self.mm_projector(dummy_video_features)
 
             if object_features is not None:
-                object_features_projected = self.mm_projector_forobject(object_features.float())
+                object_features_projected = self.mm_projector_forobject(object_features)
 
             if pose_features is not None:
                 pose_features_projected = self.mm_projector_forpose(pose_features)
@@ -253,10 +263,16 @@ class LLAVIDALLlamaModel(LlamaModel):
 
                 features_to_append = torch.cat(features_to_append, dim=0)
 
-                cur_new_input_embeds = torch.cat((cur_input_embeds[:earliest_start_token_pos].detach(), # everything before first modality token
-                                                    features_to_append, # the features
-                                                    cur_input_embeds[latest_end_token_pos + 1:].detach()), # everything after last modality token
-                                                    dim=0)
+                if orig_embeds_params is not None:
+                    cur_new_input_embeds = torch.cat((cur_input_embeds[:earliest_start_token_pos].detach(), # everything before first modality token
+                                                        features_to_append, # the features
+                                                        cur_input_embeds[latest_end_token_pos + 1:].detach()), # everything after last modality token
+                                                        dim=0)
+                else:
+                    cur_new_input_embeds = torch.cat((cur_input_embeds[:earliest_start_token_pos], # everything before first modality token
+                                                        features_to_append, # the features
+                                                        cur_input_embeds[latest_end_token_pos + 1:]), # everything after last modality token
+                                                        dim=0)
 
                 assert cur_new_input_embeds.shape[0] == input_ids.shape[1], f"Shapes dont match: {cur_new_input_embeds.shape[0]} != {input_ids.shape[1]}"
                 
@@ -277,9 +293,9 @@ class LLAVIDALLlamaModel(LlamaModel):
 class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
     config_class = LLAVIDALConfig
 
-    def __init__(self, config):
+    def __init__(self, config, model_args=None):
         super(LlamaForCausalLM, self).__init__(config)
-        self.model = LLAVIDALLlamaModel(config)
+        self.model = LLAVIDALLlamaModel(config, modality_args=model_args)
 
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
@@ -392,12 +408,16 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
                                     tune_mm_mlp_adapter=False, pretrain_mm_mlp_adapter=None):
         vision_config = self.get_model().vision_config
         vision_config.use_vid_start_end = mm_use_vid_start_end
+
+        # we dont care about the representation of these tokens since they are replaced with the actual features
         tokenizer.add_tokens([DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN], special_tokens=True)
-        self.resize_token_embeddings(len(tokenizer))
+        self.resize_token_embeddings(len(tokenizer)) # 32003 -> 32006
 
         if mm_use_vid_start_end:
-            num_new_tokens = tokenizer.add_tokens([DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN,DEFAULT_POSE_START_TOKEN,DEFAULT_POSE_END_TOKEN], special_tokens=True) # ! Add OBJECT tokens
-            self.resize_token_embeddings(len(tokenizer))
+            num_new_tokens = tokenizer.add_tokens([DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN, DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN], special_tokens=True)
+            
+            self.resize_token_embeddings(len(tokenizer)) # 32006 -> 32012
+
             vision_config.vid_start_token, vision_config.vid_end_token = tokenizer.convert_tokens_to_ids(
                 [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN])
             vision_config.object_start_token, vision_config.object_end_token = tokenizer.convert_tokens_to_ids(
@@ -406,42 +426,62 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
                 [DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN])
 
             if num_new_tokens > 0:
-                input_embeddings = self.get_input_embeddings().weight.data
-                output_embeddings = self.get_output_embeddings().weight.data
+                input_embeddings = self.get_input_embeddings().weight.data # self.embed_tokens.weight
+                output_embeddings = self.get_output_embeddings().weight.data # self.lm_head.weight
 
                 input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(
                     dim=0, keepdim=True)
                 output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(
                     dim=0, keepdim=True)
-
+                
+                # intialize new token embeddings with avg of existing embeddings
                 input_embeddings[-num_new_tokens:] = input_embeddings_avg
                 output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
+            # if finetuning the adapters
             if tune_mm_mlp_adapter:
                 self.get_model().orig_embeds_params = [
                     self.get_input_embeddings().weight.data.clone().to(device=device)]
-                for p in self.get_input_embeddings().parameters():
+                for p in self.get_input_embeddings().parameters(): # train self.embed_tokens
                     p.requires_grad = True
-                for p in self.get_output_embeddings().parameters():
+                for p in self.get_output_embeddings().parameters(): # dont train self.lm_head
                     p.requires_grad = False
 
+            # if initializing the adapters with pretrained weights
             if pretrain_mm_mlp_adapter:
                 mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
                 embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
-                input_embeddings = embed_tokens_weight
-                # assert num_new_tokens == 2
-                # if input_embeddings.shape == embed_tokens_weight.shape:
-                #     input_embeddings[-num_new_tokens:] = embed_tokens_weight[-num_new_tokens:]
-                # elif embed_tokens_weight.shape[0] == num_new_tokens:
-                #     input_embeddings[-num_new_tokens:] = embed_tokens_weight
-                # else:
-                #     raise ValueError(
-                #         f"Unexpected embed_tokens_weight shape. Pretrained: {embed_tokens_weight.shape}. "
-                #         f"Current: {input_embeddings.shape}. Numer of new tokens: {num_new_tokens}.")
+                # input_embeddings = embed_tokens_weight # this is fine if the model we are loading from did not update any of the non-new token embeddings
+                assert num_new_tokens == 6, f"Unexpected number of new tokens: {num_new_tokens}. All models using token modality prefixes should have 6 new tokens, i.e., start and end for video, object, and pose."
+                if input_embeddings.shape == embed_tokens_weight.shape:
+                    input_embeddings[-num_new_tokens:] = embed_tokens_weight[-num_new_tokens:]
+                elif embed_tokens_weight.shape[0] == num_new_tokens:
+                    input_embeddings[-num_new_tokens:] = embed_tokens_weight
+                else:
+                    raise ValueError(
+                        f"Unexpected embed_tokens_weight shape. Pretrained: {embed_tokens_weight.shape}. "
+                        f"Current: {input_embeddings.shape}. Numer of new tokens: {num_new_tokens}.")
+        else:
+            # if finetuning the adapters
+            if tune_mm_mlp_adapter:
+                if pretrain_mm_mlp_adapter:
+                    mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
+                    embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
+
+                    assert input_embeddings.shape == embed_tokens_weight.shape, f"Error loading weights from path passed in tune_mm_mlp_adapter. Unexpected embed_tokens_weight shape. From tune_mm_mlp_adapter: {embed_tokens_weight.shape}. Current: {input_embeddings.shape}."
+                    input_embeddings = embed_tokens_weight
+
+                for p in self.get_input_embeddings().parameters(): # dont train self.embed_tokens
+                    p.requires_grad = False
+                for p in self.get_output_embeddings().parameters(): # dont train self.lm_head
+                    p.requires_grad = False
 
         vision_config.vid_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_VIDEO_PATCH_TOKEN])[0]
         vision_config.object_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_OBJECT_PATCH_TOKEN])[0]
         vision_config.pose_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_POSE_PATCH_TOKEN])[0]
+
+        # print the ids of all new tokens
+        # print(tokenizer.convert_tokens_to_ids([DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN, DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN, DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN]))
 
 
 AutoConfig.register("LLAVIDAL", LLAVIDALConfig)

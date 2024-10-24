@@ -1,4 +1,4 @@
-from LLAVIDAL.llavidal.train.train_llavidal import train
+from llavidal.train.train_llavidal import train
 
 if __name__ == "__main__":
     train()

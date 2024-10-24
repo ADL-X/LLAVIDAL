@@ -2,11 +2,7 @@ from llavidal.video_conversation import conv_templates, SeparatorStyle
 from llavidal.model.utils import KeywordsStoppingCriteria
 import torch
 
-# Define constants
-DEFAULT_VIDEO_TOKEN = "<video>"
-DEFAULT_VIDEO_PATCH_TOKEN = "<vid_patch>"
-DEFAULT_VID_START_TOKEN = "<vid_start>"
-DEFAULT_VID_END_TOKEN = "<vid_end>"
+from .constants import * # this is where modality start,end,and patch tokens are defined
 
 
 def get_spatio_temporal_features_torch(features):
@@ -43,7 +39,7 @@ def get_spatio_temporal_features_torch(features):
     return concat_tokens
 
 
-def llavidal_infer(video_frames, question, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len):
+def llavidal_infer(video_frames, question, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len, max_new_tokens=1024):
     """
     Run inference using the llavidal model.
 
@@ -63,10 +59,17 @@ def llavidal_infer(video_frames, question, conv_mode, model, vision_tower, token
     """
 
     # Prepare question string for the model
-    if model.get_model().vision_config.use_vid_start_end:
-        qs = question + '\n' + DEFAULT_VID_START_TOKEN + DEFAULT_VIDEO_PATCH_TOKEN * video_token_len + DEFAULT_VID_END_TOKEN
+    if model.get_model().vision_config.use_string_modality_prefix:
+        video_append = '\n' + DEFAULT_VIDEO_STRING_PREFIX
     else:
-        qs = question + '\n' + DEFAULT_VIDEO_PATCH_TOKEN * video_token_len
+        video_append = '\n'
+
+    if model.get_model().vision_config.use_vid_start_end:
+        video_append = video_append + DEFAULT_VID_START_TOKEN + DEFAULT_VIDEO_PATCH_TOKEN * video_token_len + DEFAULT_VID_END_TOKEN
+    else:
+        video_append = video_append + DEFAULT_VIDEO_PATCH_TOKEN * video_token_len
+
+    qs = question + video_append
 
     # Prepare conversation prompt
     conv = conv_templates[conv_mode].copy()
@@ -76,6 +79,9 @@ def llavidal_infer(video_frames, question, conv_mode, model, vision_tower, token
 
     # Tokenize the prompt
     inputs = tokenizer([prompt])
+
+    # print('Prompt to LLM: ' + prompt)
+    # print(f'Token IDs: {inputs["input_ids"][0]}')
 
     # Preprocess video frames and get image tensor
     image_tensor = image_processor.preprocess(video_frames, return_tensors='pt')['pixel_values']
@@ -103,7 +109,7 @@ def llavidal_infer(video_frames, question, conv_mode, model, vision_tower, token
             video_spatio_temporal_features=video_spatio_temporal_features.unsqueeze(0),
             do_sample=True,
             temperature=0.1,
-            max_new_tokens=1024,
+            max_new_tokens=max_new_tokens,
             stopping_criteria=[stopping_criteria])
 
     # Check if output is the same as input

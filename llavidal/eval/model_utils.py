@@ -80,13 +80,15 @@ def get_seq_frames(total_num_frames, desired_num_frames):
     return seq
 
 
-def initialize_model(model_name, projection_path=None):
+def initialize_model(model_name, projection_path=None, use_token_modality_prefix=True, use_string_modality_prefix=False):
     """
     Initializes the model with given parameters.
 
     Parameters:
     model_name (str): Name of the model to initialize.
     projection_path (str, optional): Path to the projection weights. Defaults to None.
+    use_token_modality_prefix (bool, optional): Whether to use token modality prefix (e.g., <video_start><video_end>). Defaults to True.
+    use_string_modality_prefix (bool, optional): Whether to use string modality prefix (e.g., ' video: '). Defaults to False.
 
     Returns:
     tuple: Model, vision tower, tokenizer, image processor, vision config, and video token length.
@@ -105,33 +107,102 @@ def initialize_model(model_name, projection_path=None):
     # Load model
     model = LLAVIDALLlamaForCausalLM.from_pretrained(model_name, low_cpu_mem_usage=True, torch_dtype=torch.float16,
                                                          use_cache=True)
+    
+    hidden_size_video_encoder = 1024
+    model.model.mm_projector = torch.nn.Linear(hidden_size_video_encoder, model.config.hidden_size).to(model.dtype)
 
     # Load image processor
     image_processor = CLIPImageProcessor.from_pretrained(model.config.mm_vision_tower, torch_dtype=torch.float16)
 
     # Set to use start and end tokens for video
-    mm_use_vid_start_end = True
+    mm_use_vid_start_end = use_token_modality_prefix
 
-    # Add tokens to tokenizer
-    tokenizer.add_tokens([DEFAULT_VIDEO_PATCH_TOKEN], special_tokens=True)
+    '''
+    Add modality tokens to the tokenizer.
+
+    The projection weights will
+        (1) always have 3 modality patch tokens (video, object, pose) and
+        (2) maybe have 6 modality start/end tokens (video, object, pose) if mm_use_vid_start_end was True when training the model
+
+    Because we only use video modality at inference, we only add video modality tokens here. So we have to filter the video modality tokens from the projection weights.
+    '''
+    ## Add the patch tokens (these are always used)
+    modality_patch_tokens = [DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN] # token id will be 32004
+    tokenizer.add_tokens(modality_patch_tokens, special_tokens=True)
+
+    ## Add the start and end tokens for video, object, and pose
     if mm_use_vid_start_end:
-        #tokenizer.add_tokens([DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN], special_tokens=True)
-        additional_tokens = [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN,DEFAULT_OBJECT_START_TOKEN,DEFAULT_OBJECT_PATCH_TOKEN,DEFAULT_OBJECT_END_TOKEN]
-        tokenizer.add_tokens(additional_tokens, special_tokens=True)
-        # DEFAULT_POSE_START_TOKEN,DEFAULT_POSE_PATCH_TOKEN,DEFAULT_POSE_END_TOKEN
+        modality_prefix_tokens = [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN, DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN] # token id will be 32005, 32006
+        tokenizer.add_tokens(modality_prefix_tokens, special_tokens=True)
 
     # Resize token embeddings of the model
-    model.resize_token_embeddings(len(tokenizer))
-    #breakpoint()
+    model.resize_token_embeddings(len(tokenizer)) # will be 32004 or 32006 (if mm_use_vid_start_end is True)
+
 
     # Load the weights from projection_path after resizing the token_embeddings
     if projection_path:
         print(f"Loading weights from {projection_path}")
-        status = model.load_state_dict(torch.load(projection_path, map_location='cpu'), strict=False)
-        #breakpoint()
+        projector_weights = torch.load(projection_path, map_location='cpu')
+        print(f'All keys of weights to load projector_weights: {projector_weights.keys()}')
+
+        # lm_head weights are not expected in the projection weights
+        if any('lm_head' in key for key in projector_weights.keys()):
+            raise ValueError("lm_head weights are not expected in the projection weights. If you want to load lm_head comment out this line")
+        
+        if 'model.embed_tokens.weight' in projector_weights:
+            print(f'Vocab size & embedding size of loaded model (i.e., model.embed_tokens.weight of projector_weights): {projector_weights["model.embed_tokens.weight"].shape}')
+
+            vocab_size_of_proj = projector_weights['model.embed_tokens.weight'].shape[0]
+
+            # should only happen if loading the base videochatgpt weights
+            if model.get_model().embed_tokens.weight.shape[0] == vocab_size_of_proj:
+                # print("!!! Vocab size of model for inference matches the vocab size of the model being loaded. Usually this isnt the case UNLESS loading the activitynet videochatgpt weights.")
+                pass
+            # # model being loaded was trained with mm_use_vid_start_end=True: slice vid patch,start,end tokens
+            # elif vocab_size_of_proj == 32012 and mm_use_vid_start_end:
+            #     projector_weights["model.embed_tokens.weight"] = torch.cat((
+            #         projector_weights["model.embed_tokens.weight"][:32003+1], # all vicuna+llava vocab + videochatgpt vid_patch_token
+            #         projector_weights["model.embed_tokens.weight"][32006:32007+1] # videochatgpt vid_start_token and vid_end_token
+            #     ), dim=0)
+            # # model being loaded was trained with mm_use_vid_start_end=False: slice vid patch token
+            # elif vocab_size_of_proj == 32006 and not mm_use_vid_start_end:
+            #     projector_weights["model.embed_tokens.weight"] = projector_weights["model.embed_tokens.weight"][:32003+1]
+            # model being loaded was trained with mm_use_vid_start_end=False, but at inference mm_use_vid_start_end=True: raise an error
+            elif vocab_size_of_proj == 32006 and mm_use_vid_start_end:
+                raise ValueError("Model being loaded was trained WITHOUT modality start/end tokens (mm_use_vid_start_end=False), but at inference the model will use nodality start/end tokens (mm_use_vid_start_end=True). Not expected, set use_token_modality_prefix=False in this script.")
+        else:
+            assert mm_use_vid_start_end == False, "If mm_use_vid_start_end is True, then model.embed_tokens.weight should be in projector_weights"
+        
+        # Load the projection weights
+        status = model.load_state_dict(projector_weights, strict=False)
+        
         if status.unexpected_keys:
-            print(f"Unexpected Keys: {status.unexpected_keys}.\nThe llavidal weights are not loaded correctly.")
+            print(f"Unexpected Keys: {status.unexpected_keys}.")
         print(f"Weights loaded from {projection_path}")
+    else:
+        raise ValueError("Projection path is required for loading weights. Comment this out if you want to evaluate base LLaVA.")
+
+    # '''
+    # Start Manish's code from csgpu7
+    # '''
+    # tokenizer.add_tokens([DEFAULT_VIDEO_PATCH_TOKEN], special_tokens=True)
+    # if mm_use_vid_start_end:
+    #     tokenizer.add_tokens([DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN], special_tokens=True)
+    #     additional_tokens = [DEFAULT_OBJECT_START_TOKEN,DEFAULT_OBJECT_PATCH_TOKEN,DEFAULT_OBJECT_END_TOKEN,DEFAULT_POSE_START_TOKEN,DEFAULT_POSE_END_TOKEN,DEFAULT_POSE_PATCH_TOKEN]
+    #     tokenizer.add_tokens(additional_tokens, special_tokens=True)
+    # # Resize token embeddings of the model
+    # model.resize_token_embeddings(len(tokenizer))
+
+    # # Load the weights from projection_path after resizing the token_embeddings
+    # if projection_path:
+    #     print(f"Loading weights from {projection_path}")
+    #     status = model.load_state_dict(torch.load(projection_path, map_location='cpu'), strict=False)
+    #     if status.unexpected_keys:
+    #         print(f"Unexpected Keys: {status.unexpected_keys}.\nThe llavidal weights are not loaded correctly.")
+    #     print(f"Weights loaded from {projection_path}")
+    # '''
+    # End Manish's code from csgpu7
+    # '''
 
     # Set model to evaluation mode and move to GPU
     model = model.eval()
@@ -146,20 +217,19 @@ def initialize_model(model_name, projection_path=None):
 
     # Configure vision model
     vision_config = model.get_model().vision_config
-    vision_config.vid_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_VIDEO_PATCH_TOKEN])[0]
-    # vision_config.pose_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_POSE_PATCH_TOKEN])[0]
-    vision_config.object_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_OBJECT_PATCH_TOKEN])[0]    
+    vision_config.vid_patch_token = tokenizer.convert_tokens_to_ids([DEFAULT_VIDEO_PATCH_TOKEN])[0]   
     
     vision_config.use_vid_start_end = mm_use_vid_start_end
     if mm_use_vid_start_end:
         vision_config.vid_start_token, vision_config.vid_end_token = tokenizer.convert_tokens_to_ids(
             [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN])
-        # vision_config.pose_start_token, vision_config.pose_end_token = tokenizer.convert_tokens_to_ids(
-        #     [DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN])
-        vision_config.object_start_token, vision_config.object_end_token = tokenizer.convert_tokens_to_ids(
-            [DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN])
+        
+    # string modality prefix. will be taken care of in the model inference code
+    vision_config.use_string_modality_prefix = use_string_modality_prefix
 
     # Set video token length
     video_token_len = 356
+
+    # print(tokenizer.convert_tokens_to_ids([DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN, DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN, DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN]))
 
     return model, vision_tower, tokenizer, image_processor, video_token_len

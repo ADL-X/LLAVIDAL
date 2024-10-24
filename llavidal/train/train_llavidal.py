@@ -30,7 +30,7 @@ class ModelArguments:
     freeze_backbone: bool = field(default=False)
     tune_mm_mlp_adapter: bool = field(default=False)
     pretrain_mm_mlp_adapter: Optional[str] = field(default=None)
-    use_modality_token_prefix: bool = field(default=False)
+    # use_modality_token_prefix: bool = field(default=False)
     use_modality_string_prefix: bool = field(default=False)
     mm_use_vid_start_end: bool = field(default=False)
 
@@ -601,15 +601,23 @@ def train():
     model_args, data_args, training_args, llavidal_args = parser.parse_args_into_dataclasses()
 
     # multiline string
-    modality_info = f"""
+    print(f"""
     Modality Info:
     - Using Video: {data_args.video_folder is not None}
     - Using Object: {llavidal_args.object_folder is not None}
     - Using Pose: {llavidal_args.pose_folder is not None}\n\n
-    """
+    """)
+
+    modality_info = {
+        'video': True if data_args.video_folder is not None else False,
+        'object': True if llavidal_args.object_folder is not None else False,
+        'pose': True if llavidal_args.pose_folder is not None else False
+    }
+
     model = LLAVIDALLlamaForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=training_args.cache_dir,
+        model_args=modality_info,
     )
 
     model.config.use_cache = False
@@ -626,12 +634,6 @@ def train():
     )
 
     conversation_lib.default_conversation = conversation_lib.conv_templates["vicuna_v1_1"]
-
-    modality_info = {
-        'video': True if data_args.video_folder is not None else False,
-        'object': True if llavidal_args.object_folder is not None else False,
-        'pose': True if llavidal_args.pose_folder is not None else False
-    }
 
     model_vision_dict = model.get_model().initialize_vision_modules(
         modalities_to_use=modality_info,
@@ -701,11 +703,6 @@ def train():
     data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args, llavidal_args=llavidal_args) # this is the dataset
     training_args.report_to = []
     # training_args.max_steps = 10
-
-    # disable text embedding gradients
-    if not model_args.mm_use_vid_start_end:
-        model.get_model().embed_tokens.weight.requires_grad = False
-        model.lm_head.weight.requires_grad = False
 
     # show trainable parameters
     trainable_params = [n for n, p in model.named_parameters() if p.requires_grad]
