@@ -158,6 +158,8 @@ def run_inference(process_id, args):
 if __name__ == "__main__":
     args = parse_args()
 
+    assert args.use_token_modality_prefix or args.use_string_modality_prefix, 'You must at least one of --use-token-modality-prefix or --use-string-modality-prefix. Choose one depending on the model being evaluated.'
+
     sys.path.append(args.videochatgpt_path)
 
     try:
