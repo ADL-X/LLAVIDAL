@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument("--projection_path", type=str, required=False, default='/path/to/projection.bin')
     parser.add_argument("--use-token-modality-prefix", help='Use token modality prefix for the model.', action='store_true')
     parser.add_argument("--use-string-modality-prefix", help='Use string modality prefix for the model.', action='store_true')
+    parser.add_argument("--model-trained-with-base-videochatgpt", help='Model youre evaluating was trained with base videochatgpt code (changes how start/end tokens are loaded).', action='store_true')
     parser.add_argument("--debug", action='store_true', help='Debug mode.')
     return parser.parse_args()
 
@@ -27,7 +28,7 @@ def save_to_json(output_dir, output_name, data):
         json.dump(data, file, indent=4)
 
 def run_inference(args):
-    model, vision_tower, tokenizer, image_processor, video_token_len = initialize_model(args.model_name, args.projection_path, args.use_token_modality_prefix, args.use_string_modality_prefix)
+    model, vision_tower, tokenizer, image_processor, video_token_len = initialize_model(args.model_name, args.projection_path, args.use_token_modality_prefix, args.use_string_modality_prefix, args.model_trained_with_base_videochatgpt)
 
     with open(args.qa_file) as file:
         qa_data = json.load(file)
@@ -112,7 +113,7 @@ def run_inference(args):
 if __name__ == "__main__":
     args = parse_args()
 
-    assert args.use_token_modality_prefix or args.use_string_modality_prefix, 'You must at least one of --use-token-modality-prefix or --use-string-modality-prefix. Choose one depending on the model being evaluated.'
+    # assert args.use_token_modality_prefix or args.use_string_modality_prefix, 'You must at least one of --use-token-modality-prefix or --use-string-modality-prefix. Choose one depending on the model being evaluated.'
 
     sys.path.append(args.videochatgpt_path)
 
