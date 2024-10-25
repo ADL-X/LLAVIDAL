@@ -80,7 +80,7 @@ def get_seq_frames(total_num_frames, desired_num_frames):
     return seq
 
 
-def initialize_model(model_name, projection_path=None, use_token_modality_prefix=True, use_string_modality_prefix=False):
+def initialize_model(model_name, projection_path=None, use_token_modality_prefix=True, use_string_modality_prefix=False, using_base_videochatgpt_weights=False):
     """
     Initializes the model with given parameters.
 
@@ -127,12 +127,20 @@ def initialize_model(model_name, projection_path=None, use_token_modality_prefix
     Because we only use video modality at inference, we only add video modality tokens here. So we have to filter the video modality tokens from the projection weights.
     '''
     ## Add the patch tokens (these are always used)
-    modality_patch_tokens = [DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN] # token id will be 32004
+    if not using_base_videochatgpt_weights:
+        modality_patch_tokens = [DEFAULT_VIDEO_PATCH_TOKEN, DEFAULT_OBJECT_PATCH_TOKEN, DEFAULT_POSE_PATCH_TOKEN] # token id will be 32004
+    else:
+        modality_patch_tokens = [DEFAULT_VIDEO_PATCH_TOKEN]
+
     tokenizer.add_tokens(modality_patch_tokens, special_tokens=True)
 
     ## Add the start and end tokens for video, object, and pose
     if mm_use_vid_start_end:
-        modality_prefix_tokens = [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN, DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN] # token id will be 32005, 32006
+        if not using_base_videochatgpt_weights:
+            modality_prefix_tokens = [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN, DEFAULT_OBJECT_START_TOKEN, DEFAULT_OBJECT_END_TOKEN, DEFAULT_POSE_START_TOKEN, DEFAULT_POSE_END_TOKEN] # token id will be 32005, 32006
+        else:
+            modality_prefix_tokens = [DEFAULT_VID_START_TOKEN, DEFAULT_VID_END_TOKEN]
+
         tokenizer.add_tokens(modality_prefix_tokens, special_tokens=True)
 
     # Resize token embeddings of the model
@@ -154,20 +162,12 @@ def initialize_model(model_name, projection_path=None, use_token_modality_prefix
 
             vocab_size_of_proj = projector_weights['model.embed_tokens.weight'].shape[0]
 
-            # should only happen if loading the base videochatgpt weights
+            if using_base_videochatgpt_weights:
+                assert vocab_size_of_proj == 32006, "Vocab size of model trained using base videochatgpt code should be 32006"
+
             if model.get_model().embed_tokens.weight.shape[0] == vocab_size_of_proj:
-                # print("!!! Vocab size of model for inference matches the vocab size of the model being loaded. Usually this isnt the case UNLESS loading the activitynet videochatgpt weights.")
+                # Vocab size of model for inference matches the vocab size of the model being loaded. So we can load the weights as is.
                 pass
-            # # model being loaded was trained with mm_use_vid_start_end=True: slice vid patch,start,end tokens
-            # elif vocab_size_of_proj == 32012 and mm_use_vid_start_end:
-            #     projector_weights["model.embed_tokens.weight"] = torch.cat((
-            #         projector_weights["model.embed_tokens.weight"][:32003+1], # all vicuna+llava vocab + videochatgpt vid_patch_token
-            #         projector_weights["model.embed_tokens.weight"][32006:32007+1] # videochatgpt vid_start_token and vid_end_token
-            #     ), dim=0)
-            # # model being loaded was trained with mm_use_vid_start_end=False: slice vid patch token
-            # elif vocab_size_of_proj == 32006 and not mm_use_vid_start_end:
-            #     projector_weights["model.embed_tokens.weight"] = projector_weights["model.embed_tokens.weight"][:32003+1]
-            # model being loaded was trained with mm_use_vid_start_end=False, but at inference mm_use_vid_start_end=True: raise an error
             elif vocab_size_of_proj == 32006 and mm_use_vid_start_end:
                 raise ValueError("Model being loaded was trained WITHOUT modality start/end tokens (mm_use_vid_start_end=False), but at inference the model will use nodality start/end tokens (mm_use_vid_start_end=True). Not expected, set use_token_modality_prefix=False in this script.")
         else:
