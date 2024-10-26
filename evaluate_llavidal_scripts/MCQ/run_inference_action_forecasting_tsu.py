@@ -66,10 +66,10 @@ def run_inference(args):
 
         ground_truth = sample['Ground_truth']
         letter_gt = None
-        for i, v in enumerate(choices):
+        for j, v in enumerate(choices):
             # check if the list v is equal to the list ground_truth
             if v == ground_truth:
-                letter_gt = letter_lookup[str(i+1)]
+                letter_gt = letter_lookup[str(j+1)]
                 break
 
         assert letter_gt is not None, f"Ground truth not found in options for question: {question}"
