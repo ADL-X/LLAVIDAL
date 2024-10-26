@@ -465,6 +465,9 @@ class LLAVIDALLlamaForCausalLM(LlamaForCausalLM):
             # if finetuning the adapters
             if tune_mm_mlp_adapter:
                 if pretrain_mm_mlp_adapter:
+                    input_embeddings = self.get_input_embeddings().weight.data # self.embed_tokens.weight
+                    output_embeddings = self.get_output_embeddings().weight.data # self.lm_head.weight
+
                     mm_projector_weights = torch.load(pretrain_mm_mlp_adapter, map_location='cpu')
                     embed_tokens_weight = mm_projector_weights['model.embed_tokens.weight']
 

@@ -49,6 +49,9 @@ class DataArguments:
 class LLAVIDALArguments:
     object_folder: Optional[str] = field(default=None)
     pose_folder: Optional[str] = field(default=None)
+    video_mask_prob: float = field(default=0.0)
+    object_mask_prob: float = field(default=0.0)
+    pose_mask_prob: float = field(default=0.0)
 
 
 @dataclass
@@ -226,9 +229,6 @@ def preprocess_multimodal(
 
     return sources
 
-
-
-
 def preprocess_v1(
         sources,
         tokenizer: transformers.PreTrainedTokenizer,
@@ -299,7 +299,6 @@ def preprocess_v1(
         input_ids=input_ids,
         labels=targets,
     )
-
 
 def preprocess_mpt(
         sources,
@@ -372,7 +371,6 @@ def preprocess_mpt(
         labels=targets,
     )
 
-
 def preprocess(
         sources: Sequence[str],
         tokenizer: transformers.PreTrainedTokenizer,
@@ -407,7 +405,6 @@ def preprocess(
         _mask_targets(target, tokenized_lens, speakers)
 
     return dict(input_ids=input_ids, labels=targets)
-
 
 class SupervisedDataset(Dataset):
     """Dataset for supervised fine-tuning."""
@@ -459,6 +456,7 @@ class LazySupervisedDataset(Dataset):
 
         cur_video_token_len = cur_pose_token_len = cur_object_token_len = 0
 
+        # Load video features
         video_folder = self.multimodal_cfg['video_folder']
         if video_folder is not None and 'video' in sources[0]:
             video_file = self.list_data_dict[i]['video']
@@ -466,7 +464,12 @@ class LazySupervisedDataset(Dataset):
                 features = pickle.load(f)
 
             cur_video_token_len = 356  # 100 temporal + 256 spatial, TODO: Hard Coding is not good
+
+            mask_prob = self.multimodal_cfg['modality_mask_probs']['video_mask_prob']
+            if torch.rand(1) < mask_prob:
+                features = features * 0
         
+        # Load object features
         object_folder = self.multimodal_cfg['object_folder']
         if object_folder is not None and 'object' in sources[0]: # Assuming object data is present
             object_file = self.list_data_dict[i]['object']
@@ -478,8 +481,13 @@ class LazySupervisedDataset(Dataset):
             else:
                 object_features = torch.zeros((8, 512), dtype=torch.float32)  # Create a zero tensor of shape [8, 512]
 
-            cur_object_token_len = object_features.shape[0] 
+            cur_object_token_len = object_features.shape[0]
+
+            mask_prob = self.multimodal_cfg['modality_mask_probs']['object_mask_prob']
+            if torch.rand(1) < mask_prob:
+                object_features = object_features * 0
     
+        # Load pose features
         pose_folder = self.multimodal_cfg['pose_folder']
         if pose_folder is not None and 'pose' in sources[0]:
             pose_file = self.list_data_dict[i]['pose']
@@ -488,11 +496,14 @@ class LazySupervisedDataset(Dataset):
                     pose_features = pickle.load(f)
                     pose_features = torch.tensor(pose_features, dtype=torch.float32)                    
             else:
-               
                 # logging.error(f"Pose file not found: {pose_folder}/{pose_file}")
                 pose_features = torch.zeros((256, 216), dtype=torch.float32)  # Placeholder tensor
 
             cur_pose_token_len= 256
+
+            mask_prob = self.multimodal_cfg['modality_mask_probs']['pose_mask_prob']
+            if torch.rand(1) < mask_prob:
+                pose_features = pose_features * 0
 
         sources = preprocess_multimodal(
             copy.deepcopy([e["conversations"] for e in sources]),
@@ -588,7 +599,11 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer,
                                     pose_folder=llavidal_args.pose_folder,  # Pass the pose folder here
                                     frame_aspect_ratio=data_args.frame_aspect_ratio,
                                     use_vid_start_end=getattr(data_args, 'mm_use_vid_start_end', False),
-                                    use_modality_string_prefix=getattr(data_args, 'use_modality_string_prefix', False)))
+                                    use_modality_string_prefix=getattr(data_args, 'use_modality_string_prefix', False),
+                                    modality_mask_probs=dict(video_mask_prob=llavidal_args.video_mask_prob,
+                                                             object_mask_prob=llavidal_args.object_mask_prob,
+                                                             pose_mask_prob=llavidal_args.pose_mask_prob)
+                                    ))
     data_collator = DataCollatorForSupervisedDataset(tokenizer=tokenizer)
     return dict(train_dataset=train_dataset,
                 eval_dataset=None,
