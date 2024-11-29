@@ -146,56 +146,6 @@ The final model will be available in the directory you ran the above command at 
 
 ---
 
-## Video Instruction Dataset :📂
-
-We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
-
-The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip)
-
-The video features are like 
-```
-Video Features
-├── 001_video_001.pkl
-├── 001_video_002.pkl
-├── 001_video_003.pkl
-├── 001_video_004.pkl
-├── 001_video_005.pkl
-├── 001_video_006.pkl
-...
-
-```
-each video feature is of dimension 356 x 1024.
-
-The pose features are like
-```
-Pose Features
-├── 001_001_video_001_pose.pickle
-├── 001_001_video_002_pose.pickle
-├── 001_001_video_003_pose.pickle
-├── 001_001_video_004_pose.pickle
-├── 001_001_video_005_pose.pickle
-├── 001_001_video_006_pose.pickle
-├── 001_001_video_007_pose.pickle
-├── 001_001_video_008_pose.pickle
-...
-```
-each pose feature is of the dimension 216 x 256
-
-The object features are like
-```
-Object Features
-├── 001_001_video_001_object.pkl
-├── 001_001_video_002_object.pkl
-├── 001_001_video_003_object.pkl
-├── 001_001_video_004_object.pkl
-├── 001_001_video_005_object.pkl
-├── 001_001_video_006_object.pkl
-├── 001_001_video_007_object.pkl
-├── 001_001_video_008_object.pkl
-...
-```
-each object feature is of the dimension n x 8x 512, where n is the number of objects present in the video.
-
 ## ADL-X Data Curation Pipeline 📖 
 
 **NOTE: You can skip this process entirely and download the ADL-X dataset in the [Available Resources](#available-resources) section above**
@@ -335,7 +285,57 @@ Follow this notebook to get the evaluation
 cd quantitative_evaluation/mementos_evaluation.ipynb
 ```
 
+---
 
+## ADL-X Dataset Details 📂
+
+We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
+
+The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip)
+
+The video features are like 
+```
+Video Features
+├── 001_video_001.pkl
+├── 001_video_002.pkl
+├── 001_video_003.pkl
+├── 001_video_004.pkl
+├── 001_video_005.pkl
+├── 001_video_006.pkl
+...
+
+```
+each video feature is of dimension 356 x 1024.
+
+The pose features are like
+```
+Pose Features
+├── 001_001_video_001_pose.pickle
+├── 001_001_video_002_pose.pickle
+├── 001_001_video_003_pose.pickle
+├── 001_001_video_004_pose.pickle
+├── 001_001_video_005_pose.pickle
+├── 001_001_video_006_pose.pickle
+├── 001_001_video_007_pose.pickle
+├── 001_001_video_008_pose.pickle
+...
+```
+each pose feature is of the dimension 216 x 256
+
+The object features are like
+```
+Object Features
+├── 001_001_video_001_object.pkl
+├── 001_001_video_002_object.pkl
+├── 001_001_video_003_object.pkl
+├── 001_001_video_004_object.pkl
+├── 001_001_video_005_object.pkl
+├── 001_001_video_006_object.pkl
+├── 001_001_video_007_object.pkl
+├── 001_001_video_008_object.pkl
+...
+```
+each object feature is of the dimension n x 8x 512, where n is the number of objects present in the video.
 
 ---
 
