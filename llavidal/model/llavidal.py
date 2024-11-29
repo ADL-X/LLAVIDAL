@@ -6,20 +6,22 @@ from torch.nn import CrossEntropyLoss
 from transformers import AutoConfig, AutoModelForCausalLM, LlamaConfig, LlamaModel, LlamaForCausalLM
 from transformers.modeling_outputs import BaseModelOutputWithPast, CausalLMOutputWithPast
 
-DEFAULT_VIDEO_TOKEN = "<video>"
-DEFAULT_VIDEO_PATCH_TOKEN = "<vid_patch>"
-DEFAULT_VID_START_TOKEN = "<vid_start>"
-DEFAULT_VID_END_TOKEN = "<vid_end>"
+from ..constants import * # contains the default tokens for the modality prefixes
 
-DEFAULT_POSE_TOKEN = "<human_pose>"
-DEFAULT_POSE_PATCH_TOKEN = "<pose_patch>"
-DEFAULT_POSE_START_TOKEN = "<pose_start>"
-DEFAULT_POSE_END_TOKEN = "<pose_end>"
+# DEFAULT_VIDEO_TOKEN = "<video>"
+# DEFAULT_VIDEO_PATCH_TOKEN = "<vid_patch>"
+# DEFAULT_VID_START_TOKEN = "<vid_start>"
+# DEFAULT_VID_END_TOKEN = "<vid_end>"
 
-DEFAULT_OBJECT_TOKEN= "<object>"
-DEFAULT_OBJECT_PATCH_TOKEN = "<object_patch>"
-DEFAULT_OBJECT_START_TOKEN = "<object_start>"
-DEFAULT_OBJECT_END_TOKEN = "<object_end>"
+# DEFAULT_POSE_TOKEN = "<human_pose>"
+# DEFAULT_POSE_PATCH_TOKEN = "<pose_patch>"
+# DEFAULT_POSE_START_TOKEN = "<pose_start>"
+# DEFAULT_POSE_END_TOKEN = "<pose_end>"
+
+# DEFAULT_OBJECT_TOKEN= "<object>"
+# DEFAULT_OBJECT_PATCH_TOKEN = "<object_patch>"
+# DEFAULT_OBJECT_START_TOKEN = "<object_start>"
+# DEFAULT_OBJECT_END_TOKEN = "<object_end>"
 
 
 
@@ -123,9 +125,6 @@ class LLAVIDALLlamaModel(LlamaModel):
         if (input_ids.shape[1] != 1 or self.training):
             if video_spatio_temporal_features is not None:
                 video_features = self.mm_projector(video_spatio_temporal_features)
-                # dummy_video_features = torch.zeros(video_features.shape[1], 1024, device=inputs_embeds.device,
-                #                                 dtype=inputs_embeds.dtype)
-                # dummy_video_features = self.mm_projector(dummy_video_features)
 
             if object_features is not None:
                 object_features_projected = self.mm_projector_forobject(object_features)

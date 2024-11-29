@@ -160,6 +160,7 @@ def _add_speaker_and_signal(header, source, get_conversation=True):
     conversation += BEGIN_SIGNAL
     return conversation
 
+# where modality placeholders are replaced with the start/patch/end tokens
 def preprocess_multimodal(
         sources: Sequence[str],
         multimodal_cfg: dict,
@@ -626,7 +627,7 @@ def train():
     modality_info = {
         'video': True if data_args.video_folder is not None else False,
         'object': True if llavidal_args.object_folder is not None else False,
-        'pose': True if llavidal_args.pose_folder is not None else False
+        'pose': True if llavidal_args.pose_folder is not None else False,
     }
 
     model = LLAVIDALLlamaForCausalLM.from_pretrained(

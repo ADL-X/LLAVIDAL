@@ -4,7 +4,6 @@ import argparse
 import json
 import ast
 from multiprocessing.pool import Pool
-import ollama 
 
 
 def parse_args():
@@ -12,6 +11,7 @@ def parse_args():
     parser.add_argument("--pred_path", required=True, help="The path to file containing prediction.")
     parser.add_argument("--output_dir", required=True, help="The path to save annotation json files.")
     parser.add_argument("--output_json", required=True, help="The path to save annotation final combined json file.")
+    parser.add_argument("--api_key", required=True, help="OpenAI API key.")
     parser.add_argument("--num_tasks", required=True, type=int, help="Number of splits.")
     args = parser.parse_args()
     return args
@@ -30,9 +30,10 @@ def annotate(prediction_set, caption_files, output_dir):
         answer = qa_set['a']
         pred1 = qa_set['pred1']
         pred2 = qa_set['pred2']
-        try:  
-            completion = ollama.chat(
-                model="llama3.1",
+        try:
+            # Compute the consistency score
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
@@ -63,7 +64,8 @@ def annotate(prediction_set, caption_files, output_dir):
                     }
                 ]
             )
-            response_message = completion["message"]["content"]
+            # Convert response to a Python dictionary.
+            response_message = completion["choices"][0]["message"]["content"]
             response_dict = ast.literal_eval(response_message)
             result_qa_pair = [response_dict, qa_set]
 
@@ -90,14 +92,8 @@ def main():
     new_pred_contents = []
 
     # Iterate through each sample in pred_contents
-    video_id = 0
     for sample in pred_contents:
-        # video_id = sample['video_name']
-        if not sample.get('video_name',None):
-            video_id += 1
-        else: 
-            video_id = sample['video_name']
-        # print(video_id)        
+        video_id = sample['video_name']
         if video_id in video_id_counts:
             video_id_counts[video_id] += 1
         else:
@@ -130,7 +126,7 @@ def main():
         prediction_set[id] = qa_set
 
     # Set the OpenAI API key.
-    # openai.api_key = args.api_key
+    openai.api_key = args.api_key
     num_tasks = args.num_tasks
 
     # While loop to ensure that all captions are processed.

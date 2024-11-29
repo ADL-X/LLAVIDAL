@@ -1,9 +1,9 @@
-import openai
 import os
 import argparse
 import json
 import ast
 from multiprocessing.pool import Pool
+import ollama
 
 
 def parse_args():
@@ -11,7 +11,6 @@ def parse_args():
     parser.add_argument("--pred_path", required=True, help="The path to file containing prediction.")
     parser.add_argument("--output_dir", required=True, help="The path to save annotation json files.")
     parser.add_argument("--output_json", required=True, help="The path to save annotation final combined json file.")
-    parser.add_argument("--api_key", required=True, help="OpenAI API key.")
     parser.add_argument("--num_tasks", required=True, type=int, help="Number of splits.")
     args = parser.parse_args()
     return args
@@ -29,9 +28,8 @@ def annotate(prediction_set, caption_files, output_dir):
         answer = qa_set['a']
         pred = qa_set['pred']
         try:
-            # Compute the detailed-orientation score
-            completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+            completion = ollama.chat(
+                model="llama3.1",
                 messages=[
                     {
                         "role": "system",
@@ -59,8 +57,7 @@ def annotate(prediction_set, caption_files, output_dir):
                     }
                 ]
             )
-            # Convert response to a Python dictionary.
-            response_message = completion["choices"][0]["message"]["content"]
+            response_message = completion["message"]["content"]
             response_dict = ast.literal_eval(response_message)
             result_qa_pair = [response_dict, qa_set]
 
@@ -118,8 +115,7 @@ def main():
         qa_set = {"q": question, "a": answer, "pred": pred}
         prediction_set[id] = qa_set
 
-    # Set the OpenAI API key.
-    openai.api_key = args.api_key
+    
     num_tasks = args.num_tasks
 
     # While loop to ensure that all captions are processed.

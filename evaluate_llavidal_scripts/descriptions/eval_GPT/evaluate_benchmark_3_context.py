@@ -4,7 +4,6 @@ import argparse
 import json
 import ast
 from multiprocessing.pool import Pool
-import ollama 
 
 
 def parse_args():
@@ -12,6 +11,7 @@ def parse_args():
     parser.add_argument("--pred_path", required=True, help="The path to file containing prediction.")
     parser.add_argument("--output_dir", required=True, help="The path to save annotation json files.")
     parser.add_argument("--output_json", required=True, help="The path to save annotation final combined json file.")
+    parser.add_argument("--api_key", required=True, help="OpenAI API key.")
     parser.add_argument("--num_tasks", required=True, type=int, help="Number of splits.")
     args = parser.parse_args()
     return args
@@ -20,50 +20,47 @@ def parse_args():
 def annotate(prediction_set, caption_files, output_dir):
     """
     Evaluates question and answer pairs using GPT-3 and
-    returns a score for consistency.
+    returns a score for contextual understanding.
     """
     for file in caption_files:
         key = file[:-5] # Strip file extension
         qa_set = prediction_set[key]
-        question1 = qa_set['q1']
-        question2 = qa_set['q2']
+        question = qa_set['q']
         answer = qa_set['a']
-        pred1 = qa_set['pred1']
-        pred2 = qa_set['pred2']
-        try:  
-            completion = ollama.chat(
-                model="llama3.1",
+        pred = qa_set['pred']
+        try:
+            # Compute the contextual understanding score
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
                 messages=[
                     {
                         "role": "system",
                         "content":
-                            "You are an intelligent chatbot designed for evaluating the consistency of generative outputs for similar video-based question-answer pairs. "
-                            "You will be given two very similar questions, a common answer common to both the questions and predicted answers for the two questions ."
-                            "Your task is to compare the predicted answers for two very similar question, with a common correct answer and determine if they are consistent. Here's how you can accomplish the task:"
+                            "You are an intelligent chatbot designed for evaluating the contextual understanding of generative outputs for video-based question-answer pairs. "
+                            "Your task is to compare the predicted answer with the correct answer and determine if the generated response aligns with the overall context of the video content. Here's how you can accomplish the task:"
                             "------"
                             "##INSTRUCTIONS: "
-                            "- Focus on the consistency between the two predicted answers and the correct answer. Both predicted answers should correspond to the correct answer and to each other, and should not contain any contradictions or significant differences in the conveyed information.\n"
-                            "- Both predicted answers must be consistent with each other and the correct answer, in terms of the information they provide about the video content.\n"
-                            "- Consider synonyms or paraphrases as valid matches, but only if they maintain the consistency in the conveyed information.\n"
-                            "- Evaluate the consistency of the two predicted answers compared to the correct answer."
+                            "- Evaluate whether the predicted answer aligns with the overall context of the video content. It should not provide information that is out of context or misaligned.\n"
+                            "- The predicted answer must capture the main themes and sentiments of the video.\n"
+                            "- Consider synonyms or paraphrases as valid matches.\n"
+                            "- Provide your evaluation of the contextual understanding of the prediction compared to the answer."
                     },
                     {
                         "role": "user",
                         "content":
                             "Please evaluate the following video-based question-answer pair:\n\n"
-                            f"Question 1: {question1}\n"
-                            f"Question 2: {question2}\n"
+                            f"Question: {question}\n"
                             f"Correct Answer: {answer}\n"
-                            f"Predicted Answer to Question 1: {pred1}\n"
-                            f"Predicted Answer to Question 2: {pred2}\n\n"
-                            "Provide your evaluation only as a consistency score where the consistency score is an integer value between 0 and 5, with 5 indicating the highest level of consistency. "
-                            "Please generate the response in the form of a Python dictionary string with keys 'score', where its value is the consistency score in INTEGER, not STRING."
+                            f"Predicted Answer: {pred}\n\n"
+                            "Provide your evaluation only as a contextual understanding score where the contextual understanding score is an integer value between 0 and 5, with 5 indicating the highest level of contextual understanding. "
+                            "Please generate the response in the form of a Python dictionary string with keys 'score', where its value is contextual understanding score in INTEGER, not STRING."
                             "DO NOT PROVIDE ANY OTHER OUTPUT TEXT OR EXPLANATION. Only provide the Python dictionary string. "
                             "For example, your response should look like this: {''score': 4.8}."
                     }
                 ]
             )
-            response_message = completion["message"]["content"]
+            # Convert response to a Python dictionary.
+            response_message = completion["choices"][0]["message"]["content"]
             response_dict = ast.literal_eval(response_message)
             result_qa_pair = [response_dict, qa_set]
 
@@ -90,14 +87,8 @@ def main():
     new_pred_contents = []
 
     # Iterate through each sample in pred_contents
-    video_id = 0
     for sample in pred_contents:
-        # video_id = sample['video_name']
-        if not sample.get('video_name',None):
-            video_id += 1
-        else: 
-            video_id = sample['video_name']
-        # print(video_id)        
+        video_id = sample['video_name']
         if video_id in video_id_counts:
             video_id_counts[video_id] += 1
         else:
@@ -121,16 +112,14 @@ def main():
     prediction_set = {}
     for sample in new_pred_contents:
         id = sample['video_name']
-        question1 = sample['Q1']
-        question2 = sample['Q1']
+        question = sample['Q']
         answer = sample['A']
-        pred1 = sample['pred1']
-        pred2 = sample['pred2']
-        qa_set = {"q1": question1, "q2": question2, "a": answer, "pred1": pred1, "pred2": pred2}
+        pred = sample['pred']
+        qa_set = {"q": question, "a": answer, "pred": pred}
         prediction_set[id] = qa_set
 
     # Set the OpenAI API key.
-    # openai.api_key = args.api_key
+    openai.api_key = args.api_key
     num_tasks = args.num_tasks
 
     # While loop to ensure that all captions are processed.
@@ -159,7 +148,7 @@ def main():
             with Pool() as pool:
                 pool.starmap(annotate, task_args)
 
-        except Exception as e: 
+        except Exception as e:
             print(f"Error: {e}")
 
     # Combine all the processed files into one
@@ -189,7 +178,7 @@ def main():
         score_sum += score
     average_score = score_sum / count
 
-    print("Average score for consistency:", average_score)
+    print("Average score for contextual understanding:", average_score)
 
 
 if __name__ == "__main__":
