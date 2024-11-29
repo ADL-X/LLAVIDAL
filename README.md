@@ -73,20 +73,21 @@ python setup.py install
 ---
 
 ## Running Demo 🚗
-To run the LLAVIDAL demo on your local GPU machine, please adhere to the following steps. Keep in mind that the demo requires around 18 GB of GPU memory.
+We provide a Gradio demo to run LLAVIDAL on your local machine. For the best performance, use a CUDA-enabled machine with at least 18GB of VRAM.
 
-1. Follow the installation instructions above
-2. Download the LLAVIDAL weights from the following [link](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights)
-3. Download LLaVa weights from this [link](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
+1. Activate the llavidal Conda environment `conda activate llavidal`
+2. Download the following LLaVA weights: [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
+3. Download the LLAVIDAL weights from [Available Resources](#available-resources)
 
 Finally, run the demo by executing the following command:
 ```shell
 python llavidal/demo/video_demo.py \
-    --model-name <path to the LLaVA-7B-Lightening-v1-1 weights downloaded in step 3> \
-    --projection_path <path to the downloaded llavidal weights downloaded in step 2>
+    --model-name <path to the LLaVA-7B-Lightening-v1-1 weights downloaded in step 2> \
+    --projection_path <path to the downloaded llavidal weights (llavidal_weights.bin
+) downloaded in step 3>
 ```
 
-After running the command, follow the on-screen instructions to access the demo dashboard.
+After running the command, follow the on-screen instructions to use the demo.
 ---
 
 ## Training 💪🦾
