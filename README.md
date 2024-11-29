@@ -80,6 +80,7 @@ We provide a Gradio demo to run LLAVIDAL on your local machine. For the best per
 3. Download the LLAVIDAL weights from [Available Resources](#available-resources)
 
 Finally, run the demo by executing the following command:
+
 ```shell
 python llavidal/demo/video_demo.py \
     --model-name <path to the LLaVA-7B-Lightening-v1-1 weights downloaded in step 2> \
@@ -87,7 +88,8 @@ python llavidal/demo/video_demo.py \
 ) downloaded in step 3>
 ```
 
-After running the command, follow the on-screen instructions to use the demo.
+After running the command a URL will be provided. Click this URL and follow the on-screen instructions to use the demo.
+
 ---
 
 ## Training 💪🦾
