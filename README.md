@@ -94,49 +94,13 @@ After running the command a URL will be provided. Click this URL and follow the 
 
 ## Training 💪🦾
 
-We train LLAVIDAL model on our 100K video instruction dataset. We initialize the training from LLaVA.
-Please follow the instructions below to train LLAVIDAL-7B model.
-Prepare LLaVA weights
-LLAVIDAL is build using LLaVA. Please follow the following instructions of VideoChatGPT to get LLaVA weights.
+LLAVIDAL is trained on ADL-X, an ADL dataset of over 100K video-instruction pairs. The weights of the model are initialized from LLaVA and is trained for 3 epochs on 8 48GB NVIDIA RTX A6000 GPUs. To begin, download the LLaVA weights from this link: [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1).
 
-Get the original LLaMA weights in the Hugging Face format.
-Use the following scripts to get LLaVA weights by applying our delta.
-```shell
-python scripts/apply_delta.py \ 
-        --base-model-path <path to LLaMA 7B weights> \
-        --target-model-path LLaVA-Lightning-7B-v1-1 \
-        --delta-path liuhaotian/LLaVA-Lightning-7B-delta-v1-1
-```
-The above command will download the LLaVA-Lightening-7B-v1-1 delta from Hugging Face, apply it to the provided LLaMA
-weights and save the LLaVA-Lightening-7B-v1-1 weights in the current directory.
-Alternatively you can download the ready LLaVA-Lightening-7B weights from [mmaaz60/LLaVA-Lightening-7B-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1)
-Prepare Dataset
-To prepare the dataset, you have two options:
-1. **Download the pre-computed features**:
-   - Download our [ADLX dataset video features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/video_features.zip).
-2. **Curate the dataset yourself**:
-   - Follow the steps in the [Data Curation Pipeline](#data-curation-pipeline).
-
-3. Convert the downloaded [NTU_QA.json](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) into the required format for training,
-```shell
-python scripts/convert_instruction_json_to_training_format.py \
-        --input_json_file <path to json file downloaded in step 2> \
-        --output_json_file llavidal_training.json
-The above script will generate llavidal_training.json required to train our model.
-```
-3. Prepare Spatio-Temporal features using CLIP
-Note that for training efficiency, we pre-computed the video spatio-temporal features and use them directly during training.
-After downloading the videos, please use the following command to generate CLIP spatio-temporal features.
- ```shell
- python scripts/save_spatio_temporal_clip_features.py \
-        --video_dir_path <path to the directory containing all the videos> \
-        --clip_feat_path <The output dir to save the features in.>
-```
-The script will generate the spatiotemporal features for each video and
-save one pickle file per video in directory specified by --clip_feat_path argument.
-Alternatively, you can download the pre-computed spatiotemporal CLIP features from [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/video_features.zip).
-
-5. We are providing object features, pose features which are used as additional cues in the training. Which can be downloaded from here. We use the object features as our final model as it shows superior capabilities through our evaluation metrics.
+We provide two methods to prepare the ADL-X dataset:
+1. **Download the pre-extracted features (quickest)**:
+   - Download the Multi-modal Features (`video_features.zip`, `object_features.zip`, `pose_features.zip`) and Instruction Dataset (`NTU_QA-for-training.json`) from [Available Resources](#available-resources)
+2. **Curate the dataset and extract the features**:
+   - Follow the steps in the [Data Curation Pipeline](#data-curation-pipeline-).
 
 6. Train LLAVIDAL
 We have trained on 8 A6000 40GB GPUs using the following command,
@@ -225,15 +189,17 @@ Object Features
 ```
 each object feature is of the dimension n x 8x 512, where n is the number of objects present in the video.
 
-## Data Curation Pipeline 📖 
+## ADL-X Data Curation Pipeline 📖 
 
-If you want to recreate our dataset curation pipeline you can do so in the following steps:
+**NOTE: You can skip this process entirely and download the ADL-X dataset in the [Available Resources](#available-resources) section above**
 
-Step 1: Download [NTURGBD dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/),follow the steps to get the dataset.
+Follow the steps below to recreate ADL-X using the data curation pipeline proposed in the paper.
 
-Step 2: Download the action combination list we created [ACTION LIST](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/data_curation/all_action_combinations.txt).
+**Step 1**: Download the [NTU-RGB+D dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/)
 
-Step 3: Arrange the NTU videos in Performer folders like P001,P002, etc like
+**Step 2**: Download the action combination [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/data_curation/all_action_combinations.txt).
+
+**Step 3**: Arrange the directory structure of the NTU-RGB+D videos in the following way:
 
 ```
 NTU Videos
@@ -251,41 +217,46 @@ NTU Videos
 │   ...
 
 ...
-
 ```
 
-Step 4: Run the code, 
+**Step 4**: Generate the temporally stitched videos with the following command, passing the action combination list and video folder path.
 ``` shell 
 python /data_annotation/process_video_sequences.py
 ```
-and pass the action combination list and video folder paths.
 
-Step 5: Download and setup [CogVLM](https://github.com/THUDM/CogVLM). Follow the instructions to deploy the huggingface version to get frame-level annotations at 0.5fps. Run the command of the CogVLM demo,
+**Step 5**: Download and install [CogVLM](https://github.com/THUDM/CogVLM). Run the following command (which uses [cli_demo_hf.py](https://github.com/THUDM/CogVLM/blob/main/basic_demo/cli_demo_hf.py)) to get frame-level annotations of the temporally stitched videos at 0.5fps:
 ```shell
 python cli_demo_hf.py --from_pretrained THUDM/cogvlm-chat-hf --quant 4
 ```
 
-Step 6: Get dense descriptions from GPT 3.5 Turbo using command,
+**Step 6**: Obtain dense video descriptions using GPT 3.5 Turbo with the following command, passing the frame-level annotations from Step 5 and your OpenAI API key:
 ``` shell 
-python /data_annotation/generate_dense_descriptions.py
+python data_annotation/generate_dense_descriptions.py
 ```
-Pass the appropiate paths of the files and your OPENAI api key.
 
-Step 6: Get QA pairs by running command,
+**Step 7**: Generate QA pairs by running the following command, passing the dense video descriptions from Step 6 and your OpenAI API key:
 ``` shell 
 python /data_annotation/generate_QA_pairs.py
 ```
-Pass the previous made dense captions here and your OPENAI api key.
 
-Alternatively you can access our **[TRAINING_DATA](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/instruction_data)** here if you want to skip the above process. We have provided both jsons, the final json that would be used for training is instruction_converted_training_data.json or else you can follow scripts to convert it yourself the NTU_QA.json to instruction data.
+**Step 8**: Convert the generated QA pairs from Step 7 (also availble at [NTU_QA.json](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation)) into the required format for training:
+```shell
+python scripts/convert_instruction_json_to_training_format.py \
+        --input_json_file <path to json file downloaded in step 2> \
+        --output_json_file NTU_QA-for-training.json
+```
 
-You can adapt the above process for your own ADL dataset curation with any ADL data just create your own action combinations like that of STEP 2.
+**Step 9**: Prepare Spatio-Temporal features using CLIP
+For training efficiency, we pre-compute the spatio-temporal video features used during training. The following command will save one pickle file per video in directory specified by the `--clip_feat_path` argument. Run the following command to generate spatio-temporal features with CLIP:
+ ```shell
+ python scripts/save_spatio_temporal_clip_features.py \
+        --video_dir_path <path to the directory containing videos generated in Step 4> \
+        --clip_feat_path <The output dir to save the features in>
+```
 
+**Step 10**: Download the pre-computed pose (`pose_features.zip`) and object features (`object_features.zip`) from [Available Resources](#available-resources) and extract them
 
-
-**It is important to note we preprocessed our data to have person-centric cropping using Poses.**
-
-**We highlight in our paper, why person-centric cropping is necessary for ADL Instruction Data Curation**
+Our data curation pipeline can be adapted to trimmed (start at Step 2) or untrimmed (start at Step 5) video datasets.
 
 ---
 
