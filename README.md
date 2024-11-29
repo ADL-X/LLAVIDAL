@@ -94,27 +94,23 @@ After running the command a URL will be provided. Click this URL and follow the 
 
 ## Training 💪🦾
 
-LLAVIDAL is trained on ADL-X, an ADL dataset of over 100K video-instruction pairs. The weights of the model are initialized from LLaVA and is trained for 3 epochs on 8 48GB NVIDIA RTX A6000 GPUs. To begin, download the LLaVA weights from this link: [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1).
+LLAVIDAL is trained on ADL-X, an ADL dataset of over 100K video-instruction pairs. The weights of the model are initialized from LLaVA and it is trained for 3 epochs on 8 48GB NVIDIA RTX A6000 GPUs. To begin, download the LLaVA weights from this link: [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1).
 
 We provide two methods to prepare the ADL-X dataset:
-1. **Download the pre-extracted features (quickest)**:
+1. **Download the pre-extracted features (recommended)**:
    - Download the Multi-modal Features (`video_features.zip`, `object_features.zip`, `pose_features.zip`) and Instruction Dataset (`NTU_QA-for-training.json`) from [Available Resources](#available-resources)
+   - This should result in separate directories for each modality, and a json for training
 2. **Curate the dataset and extract the features**:
-   - Follow the steps in the [Data Curation Pipeline](#data-curation-pipeline-).
+   - Follow the steps in [Data Curation Pipeline](#data-curation-pipeline-).
 
-6. Train LLAVIDAL
-We have trained on 8 A6000 40GB GPUs using the following command,
+### Standard training (this is not MMPro training proposed in the paper)
+The command below will train the LLAVIDAL architecture for 3 epochs on all three modalities. This command is modular and will only train LLAVIDAL with the modalities whose folders are passed. For example, if only `--object_folder` and `--pose_folder` is passed, LLAVIDAL will drop the video modality and will only train with the object and pose modalities.
 ```shell
 torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
-          --model_name_or_path <path to LLaVA-7B-Lightening-v-1-1 model> \
           --version v1 \
-          --data_path <path to the llavidal using `convert_instruction_json_to_training_format.py` script.> \
-          --video_folder <path to the spatio-temporal features generated in step 4 using `save_spatio_temporal_clip_features.py` script> \
-          --object_folder <path to the downloaded object features>/
           --tune_mm_mlp_adapter True \
           --mm_use_vid_start_end \
           --bf16 True \
-          --output_dir ./LLAVIDAL_7B-1.1_Checkpoints \
           --num_train_epochs 3 \
           --per_device_train_batch_size 4 \
           --per_device_eval_batch_size 4 \
@@ -131,11 +127,22 @@ torchrun --nproc_per_node=8 --master_port 29001 llavidal/train/train_mem.py \
           --tf32 True \
           --model_max_length 2048 \
           --gradient_checkpointing True \
-          --lazy_preprocess True
-
+          --lazy_preprocess True \
+          --output_dir ./work_dirs/LLAVIDAL_video-object-pose-text_3epochs \
+          --model_name_or_path /path/to/LLaVA-7B-Lightening-v-1-1/ \
+          --data_path /path/to/NTU_QA-for-training.json \
+          --video_folder /path/to/video_features/ \
+          --object_folder /path/to/object_features/ /
+          --pose_folder /path/to/pose_features/
 ```
- You can change the object features to pose features and change one line in the code to pass train_pose.py and llavidal_pose.py in train_mem.py. Similarly, for both object and pose features use train_pose_object.py and llavidal_pose_object.py. Pass the object and pose path together in that case.
 
+### MMPro training
+This is the suggested method to train LLAVIDAL, in which we use a curriculum learning approach to sequentially introduce modalities into LLAVIDAL. In the implementation this consists of training many models independently in stage 1, merging their weights, and propogating those weights to the next stage. The following command can be use to train LLAVIDAL with MMPro training (**UPDATE THE PATHS in mmpro_training.sh BEFORE RUNNING**):
+```shell
+bash scripts/mmpro_training.sh
+```
+
+The final model will be available in the directory you ran the above command at `./work_dirs/mmpose_training/stage3_video-pose-object-text/`.
 
 ---
 
