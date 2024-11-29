@@ -26,9 +26,9 @@ This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Vid
     <thead><tr><th colspan=4><a href="#installation-wrench">Start with installation (click here)</a></th></tr></thead>
     <tbody><tr>
         <td><a href="#running-demo-">I want to try the demo</td>
-        <td>I want to train LLAVIDAL</td>
-        <td>I want to reproduce LLAVIDAL results</td>
-        <td>I want to generate the ADL-X dataset</td>
+        <td><a href="#training-">I want to train LLAVIDAL</td>
+        <td><a href="#quantitative-evaluation-">I want to reproduce LLAVIDAL results</td>
+        <td><a href="#adl-x-data-curation-pipeline-">I want to generate the ADL-X dataset</td>
     </tr></tbody>
 </table>
 
