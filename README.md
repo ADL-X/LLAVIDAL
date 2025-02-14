@@ -347,14 +347,13 @@ each object feature is of the dimension n x 8x 512, where n is the number of obj
 
 If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
 ```bibtex
-@misc{chakraborty2024llavidal,
-      title={LLAVIDAL: Benchmarking Large Language Vision Models for Daily Activities of Living}, 
-      author={Rajatsubhra Chakraborty and Arkaprava Sinha and Dominick Reilly and Manish Kumar Govind and Pu Wang and Francois Bremond and Srijan Das},
-      year={2024},
-      eprint={2406.09390},
-      archivePrefix={arXiv},
-      primaryClass={id='cs.CV' full_name='Computer Vision and Pattern Recognition' is_active=True alt_name=None in_archive='cs' is_general=False description='Covers image processing, computer vision, pattern recognition, and scene understanding. Roughly includes material in ACM Subject Classes I.2.10, I.4, and I.5.'}
-}
+@article{llavidal2024,
+  title={LLAVIDAL: A Large LAnguage VIsion Model for Daily Activities of Living}, 
+  author={Dominick Reilly and Rajatsubhra Chakraborty and Arkaprava Sinha and Manish Kumar Govind and Pu Wang and Francois Bremond and Le Xue and Srijan Das},
+  journal={arXiv},
+  year={2024},
+  volume={2406.09390}
+} 
 ```
 ----------
 
