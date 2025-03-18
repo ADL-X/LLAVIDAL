@@ -148,24 +148,24 @@ The final model will be available in the directory you ran the above command at 
 
 ## ADL-X Data Curation Pipeline 📖 
 
-**NOTE: You can skip this process entirely and download the ADL-X dataset in the [Available Resources](#available-resources) section above**
+**NOTE: If you are only interested in training LLAVIDAL, you can skip this process entirely and download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**
 
 Follow the steps below to recreate ADL-X using the data curation pipeline proposed in the paper.
 
 **Step 1**: Download the [NTU-RGB+D dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/)
 
-**Step 2**: Download the action combination [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/data_curation/all_action_combinations.txt).
+**Step 2**: Download the action combination list [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/data_curation/all_action_combinations.txt).
 
 **Step 3**: Arrange the directory structure of the NTU-RGB+D videos in the following way:
 
 ```
 NTU Videos
-├── P001
+├── 001
 │   ├── S001C001P001R001A001_rgb.avi
 │   ├── S001C001P001R001A002_rgb.avi
 │   ├── S001C001P001R001A003_rgb.avi
 │   ...
-├── P015
+├── 015
 │   ├── S003C001P015R001A001_rgb.avi
 │   ├── S003C001P015R001A002_rgb.avi
 │   ├── S003C001P015R001A003_rgb.avi
@@ -176,7 +176,7 @@ NTU Videos
 ...
 ```
 
-**Step 4**: Generate the temporally stitched videos with the following command, passing the action combination list and video folder path.
+**Step 4**: Generate the temporally stitched videos with the following command, update the file with the action combination list, NTU video directory, and directory to save the temporally stitched videos.
 ``` shell 
 python /data_annotation/process_video_sequences.py
 ```
