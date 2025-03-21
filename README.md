@@ -4,7 +4,6 @@
   <img src="./llavidal/static/web-teaser.jpg" alt="LLAVIDAL Approach Overview">
 </p>   
 
-This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
 
 -----
 ## Available resources
@@ -83,12 +82,13 @@ After running the command a URL will be provided. Click this URL and follow the 
 
 LLAVIDAL is trained on ADL-X, an ADL dataset of over 100K video-instruction pairs. The weights of the model are initialized from LLaVA and it is trained for 3 epochs on 8 48GB NVIDIA RTX A6000 GPUs. To begin, download the LLaVA weights from this link: [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1).
 
-We provide two methods to prepare the ADL-X dataset:
-1. **Download the pre-extracted features (recommended)**:
-   - Download the Multi-modal Features (`video_features.zip`, `object_features.zip`, `pose_features.zip`) and Instruction Dataset (`NTU_QA-for-training.json`) from [Available Resources](#available-resources)
+We provide two methods to prepare the ADL-X dataset for training:
+1. **Download the pre-extracted RGB/Object/Skeleton features (recommended)**:
+   - Download the multi-modal features (`video_features.zip`, `object_features.zip`, `pose_features.zip`) and Instruction Dataset (`NTU_QA-for-training.json`) from [Available Resources](#available-resources)
    - This should result in separate directories for each modality, and a json for training
-2. **Curate the dataset and extract the features**:
-   - Follow the steps in [Data Curation Pipeline](#data-curation-pipeline-).
+2. **Curate the ADL-X RGB videos and generate RGB features, download Object/Skeleton**:
+   - Follow the steps in [Data Curation Pipeline](#data-curation-pipeline-) to obtain the ADL-X videos. Extract features using any feature extractor (e.g., CLIP/SigLIP) 
+   - Download the multi-modal Object/Skeleton features (`object_features.zip`, `pose_features.zip`)
 
 ### Standard training (this is not MMPro training proposed in the paper)
 The command below will train the LLAVIDAL architecture for 3 epochs on all three modalities. This command is modular and will only train LLAVIDAL with the modalities whose folders are passed. For example, if only `--object_folder` and `--pose_folder` is passed, LLAVIDAL will drop the video modality and will only train with the object and pose modalities.
@@ -139,7 +139,7 @@ The final model will be available in the directory you ran the above command at 
   <img src="./llavidal/static/adlx-curation-web.jpg" alt="LLAVIDAL Architecture Overview">
 </p>   
 
-**NOTE: You only need to follow the steps below if you want to regenerate the ADL-X RGB videos. If you are only interested in training LLAVIDAL, you can skip this process entirely and directly download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**. 
+**NOTE: You only need to follow the steps below if you want to generate the ADL-X RGB videos. If you are only interested in training LLAVIDAL, you can skip this process entirely and directly download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**. 
 
 Follow the steps below to recreate ADL-X using the data curation pipeline proposed in the paper. You'll need to obtain access to and download the [NTU-RGB+D dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/). 
 
@@ -294,21 +294,17 @@ each object feature is of the dimension n x 8x 512, where n is the number of obj
 ---
 
 ## Acknowledgements 🙏
++ [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT?tab=readme-ov-file)
++ [CogVLM](https://github.com/THUDM/CogVLM)
 
-+ [LLaMA](https://github.com/facebookresearch/llama): Great step towards bridging vision and language!
-+ [VideoChatgpt](https://github.com/mbzuai-oryx/Video-ChatGPT?tab=readme-ov-file): We thank for the foundational work.
-+ [LLAVA](https://llava-vl.github.io) : For inspiring the overall architecture
-+ [CogVLM](https://github.com/THUDM/CogVLM): For creating a strong captioning model.
-
-If you're using LLAVIDAL in your research or applications, please cite using this BibTeX:
+If you're using LLAVIDAL in your research or application, please consider citing it using the following BibTeX:
 ```bibtex
-@article{llavidal2024,
+@inproceedings{llavidal2024,
   title={LLAVIDAL: A Large LAnguage VIsion Model for Daily Activities of Living}, 
   author={Dominick Reilly and Rajatsubhra Chakraborty and Arkaprava Sinha and Manish Kumar Govind and Pu Wang and Francois Bremond and Le Xue and Srijan Das},
-  journal={arXiv},
-  year={2024},
-  volume={2406.09390}
-} 
+    booktitle={Proceedings of the Conference on Computer Vision and Pattern Recognition (CVPR)}
+    year={2025}
+}
 ```
 ----------
 
@@ -317,5 +313,3 @@ If you're using LLAVIDAL in your research or applications, please cite using thi
 The dataset is protected under the CC-BY license of Creative Commons, which allows users to distribute, remix, adapt, and build upon the material in any medium or format, as long as the creator is attributed. The license allows ADL-X for commercial use. As the authors of this manuscript and collectors of this dataset, we reserve the right to distribute the data.
 
 ------
-
-
