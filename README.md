@@ -1,7 +1,7 @@
 # <img src="./llavidal/static/llavidal.ico"  style="vertical-align:middle;"/> LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living 🏃👩‍🦯‍➡️🗨️
 
 <p align="center">
-  <img src="./llavidal/static/adlx-curation-web.jpg" alt="LLAVIDAL Approach Overview">
+  <img src="./llavidal/static/web-teaser.jpg" alt="LLAVIDAL Approach Overview">
 </p>   
 
 This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
