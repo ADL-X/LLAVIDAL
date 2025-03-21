@@ -150,70 +150,36 @@ The final model will be available in the directory you ran the above command at 
 
 **NOTE: If you are only interested in training LLAVIDAL, you can skip this process entirely and download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**
 
-Follow the steps below to recreate ADL-X using the data curation pipeline proposed in the paper.
+Follow the steps below to recreate ADL-X using the data curation pipeline proposed in the paper. You'll need to obtain access to and download the [NTU-RGB+D dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/). 
 
-**Step 1**: Download the [NTU-RGB+D dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/)
-
-**Step 2**: Download the action combination list [here](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/data_curation/all_action_combinations.txt).
-
-**Step 3**: Arrange the directory structure of the NTU-RGB+D videos in the following way:
-
+**1.** Be sure your NTU data directory is structured in the following way
 ```
-NTU Videos
-├── 001
+NTU120
+├── rgb
 │   ├── S001C001P001R001A001_rgb.avi
 │   ├── S001C001P001R001A002_rgb.avi
-│   ├── S001C001P001R001A003_rgb.avi
 │   ...
-├── 015
-│   ├── S003C001P015R001A001_rgb.avi
-│   ├── S003C001P015R001A002_rgb.avi
-│   ├── S003C001P015R001A003_rgb.avi
-│   ├── S003C001P015R001A004_rgb.avi
-│   ├── S003C001P015R001A005_rgb.avi
+├── skeletons
+│   ├── S001C001P001R001A001.skeleton.npy
+│   ├── S001C001P001R001A002.skeleton.npy
 │   ...
-
-...
 ```
 
-**Step 4**: Generate the temporally stitched videos with the following command, update the file with the action combination list, NTU video directory, and directory to save the temporally stitched videos.
-``` shell 
-python /data_annotation/process_video_sequences.py
-```
-
-**Step 5**: Download and install [CogVLM](https://github.com/THUDM/CogVLM). Run the following command (which uses [cli_demo_hf.py](https://github.com/THUDM/CogVLM/blob/main/basic_demo/cli_demo_hf.py)) to get frame-level annotations of the temporally stitched videos at 0.5fps:
+**2.** Modify the paths in the following script and run it:
 ```shell
-python cli_demo_hf.py --from_pretrained THUDM/cogvlm-chat-hf --quant 4
+bash adlx_curation/gen_adlx_videos_and_QA.sh
 ```
 
-**Step 6**: Obtain dense video descriptions using GPT 3.5 Turbo with the following command, passing the frame-level annotations from Step 5 and your OpenAI API key:
-``` shell 
-python data_annotation/generate_dense_descriptions.py
-```
 
-**Step 7**: Generate QA pairs by running the following command, passing the dense video descriptions from Step 6 and your OpenAI API key:
-``` shell 
-python /data_annotation/generate_QA_pairs.py
-```
-
-**Step 8**: Convert the generated QA pairs from Step 7 (also availble at [NTU_QA.json](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation)) into the required format for training:
-```shell
-python scripts/convert_instruction_json_to_training_format.py \
-        --input_json_file <path to json file downloaded in step 2> \
-        --output_json_file NTU_QA-for-training.json
-```
-
-**Step 9**: Prepare Spatio-Temporal features using CLIP
+**3.**: Prepare Spatio-Temporal features using CLIP
 For training efficiency, we pre-compute the spatio-temporal video features used during training. The following command will save one pickle file per video in directory specified by the `--clip_feat_path` argument. Run the following command to generate spatio-temporal features with CLIP:
  ```shell
  python scripts/save_spatio_temporal_clip_features.py \
-        --video_dir_path <path to the directory containing videos generated in Step 4> \
-        --clip_feat_path <The output dir to save the features in>
+        --video_dir_path /directory/to/save/stitched/videos/ \
+        --clip_feat_path <The output dir where features should be saved>
 ```
 
-**Step 10**: Download the pre-computed pose (`pose_features.zip`) and object features (`object_features.zip`) from [Available Resources](#available-resources) and extract them
-
-Our data curation pipeline can be adapted to trimmed (start at Step 2) or untrimmed (start at Step 5) video datasets.
+**4.**: Download the pre-computed pose (`pose_features.zip`) and object features (`object_features.zip`) from [Available Resources](#available-resources) and extract them
 
 ---
 
