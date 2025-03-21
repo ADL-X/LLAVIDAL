@@ -15,10 +15,11 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description="Descriptive question-answer-generation-using-GPT-3")
     parser.add_argument("--step3_description_json", required=True, help="Path to the image captions from step3.")
+    parser.add_argument('--action_mapping_json', type=str, required=True, help='Path to action mapping JSON file')
     parser.add_argument("--openai_api_key", required=True, help="OpenAI API key.")
     return parser.parse_args()
 
-def annotate(captions):
+def annotate(captions, action_sequence):
     """
     Generates question and answer pairs based on video captions using OpenAI GPT-3 and returns the response dictionary.
     """
@@ -51,7 +52,7 @@ def annotate(captions):
                 },
                 {
                     "role": "user",
-                    "content": f"The fragmented video description is: {mega_caption}. "
+                    "content": f"The fragmented video description is: {mega_caption}. The actions performed in the video are: {action_sequence}. "
                                '''Please generate the response in the form of a Python dictionary string with keys "Q" for question and "A" for answer. Each corresponding value should be the question and answer text respectively.'''
                                '''For example, your response should look like this: {"Q": "Your question here...", "A": "Your answer here..."}.'''
                                '''Emphasize that the answer should focus on describing the video content following the given instructions.'''
@@ -85,6 +86,9 @@ def main():
     
     with open(args.step3_description_json) as file:
         image_captions = json.load(file)
+
+    with open(args.action_mapping_json) as file:
+        action_mappings = json.load(file)
     
     openai.api_key = args.openai_api_key  # Replace with your actual API key
     
@@ -92,7 +96,8 @@ def main():
     save_interval = 10  # Save progress every 10 videos
     
     for idx, (video_id, descriptions) in enumerate(tqdm(image_captions.items())):
-        response_dict = annotate(descriptions)
+        aciton_sequence = action_mappings[video_id]
+        response_dict = annotate(descriptions, aciton_sequence)
         combined_annotations[video_id] = response_dict
         
         # Save progress periodically
