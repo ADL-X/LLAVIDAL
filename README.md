@@ -139,7 +139,7 @@ The final model will be available in the directory you ran the above command at 
   <img src="./llavidal/static/adlx-curation-web.jpg" alt="LLAVIDAL Architecture Overview">
 </p>   
 
-**NOTE: If you are only interested in training LLAVIDAL, you can skip this process entirely and download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**
+**NOTE: You only need to follow the steps below if you want to regenerate the ADL-X RGB videos. If you are only interested in training LLAVIDAL, you can skip this process entirely and directly download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**. 
 
 Follow the steps below to recreate ADL-X using the data curation pipeline proposed in the paper. You'll need to obtain access to and download the [NTU-RGB+D dataset](https://rose1.ntu.edu.sg/dataset/actionRecognition/). 
 
@@ -162,7 +162,7 @@ bash adlx_curation/gen_adlx_videos_and_QA.sh
 ```
 
 
-**3.**: Prepare Spatio-Temporal features using CLIP
+**3.** Prepare Spatio-Temporal features using CLIP
 For training efficiency, we pre-compute the spatio-temporal video features used during training. The following command will save one pickle file per video in directory specified by the `--clip_feat_path` argument. Run the following command to generate spatio-temporal features with CLIP:
  ```shell
  python scripts/save_spatio_temporal_clip_features.py \
@@ -170,7 +170,7 @@ For training efficiency, we pre-compute the spatio-temporal video features used 
         --clip_feat_path <The output dir where features should be saved>
 ```
 
-**4.**: Download the pre-computed pose (`pose_features.zip`) and object features (`object_features.zip`) from [Available Resources](#available-resources) and extract them
+**4.** Download the pre-computed pose (`pose_features.zip`) and object features (`object_features.zip`) from [Available Resources](#available-resources) and extract them
 
 ---
 
