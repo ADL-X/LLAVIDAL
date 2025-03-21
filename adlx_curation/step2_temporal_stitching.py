@@ -5,6 +5,7 @@ from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 parser = argparse.ArgumentParser(description='Reconstruct NTU videos from cropped frames')
 parser.add_argument('--cropped_ntu_dir', type=str, help='Directory containing cropped NTU120 video dataset')
+parser.add_argument('--video_mapping_json', type=str, help='Path to video mapping JSON file')
 parser.add_argument('--save_dir', type=str)
 args = parser.parse_args()
 
@@ -14,15 +15,7 @@ save_dir = args.save_dir
 # save_dir = '/data/users/dreilly1/LLAVIDAL_datagen/ADLX_regen/'
 os.makedirs(save_dir, exist_ok=True)
 
-all_video_mappings_raw = sorted(glob.glob('/data/vidlab_datasets/NTU_combination_videos/*/video_mapping.json'))
-all_video_mappings = {}
-
-for video_mapping in all_video_mappings_raw:
-    map_json = json.load(open(video_mapping))
-    key = list(map_json.keys())[0]
-    if key == 'poi': continue
-
-    all_video_mappings.update(map_json[key])
+all_video_mappings = json.load(open(args.video_mapping_json, 'r'))
 
 iterator = tqdm.tqdm(all_video_mappings.items(), total=len(all_video_mappings))
 
