@@ -1,14 +1,11 @@
 # Required Libraries
 import openai
-import os
 import json
-import time
 import ast
 import argparse
 import warnings
 from tqdm import tqdm
 from pathlib import Path
-from openai import OpenAI
 
 # Suppressing all warnings
 warnings.filterwarnings('ignore')
@@ -26,6 +23,7 @@ def enforce_closing_bracket(text):
         return modified_text
     else:
         return text
+
 def safe_literal_eval(s):
     try:
         return ast.literal_eval(s)
@@ -33,37 +31,26 @@ def safe_literal_eval(s):
         # Handle the unmatched '}' by returning None or an appropriate placeholder
         print("Syntax error encountered in response. Skipping.")
         return None    
-def annotate(args, client):
-    """
-    Generate question-answer pairs using caption and
-    dense-captions summarized from off-the-shelf models using OpenAI GPT-3.
-    """
-
-    # Create output directory if it does not exist
-    if not os.path.exists(args.output_dir):
-        os.makedirs(args.output_dir)
-
-    start_time = time.time()
-
-    with open(args.cogvlm_captions_file) as f:
+    
+def annotate(args):
+    with open(args.step3_image_captions_path) as f:
         cogvlm_captions = json.load(f)
 
-    with open(args.detection_captions_file) as f:
-        detection_captions = json.load(f)
+    with open(args.step4_WS_video_descs) as f:
+        video_descriptions = json.load(f)
 
     results = []
-    for video_id, values in tqdm(cogvlm_captions.items(), desc="Processing videos"):
-        caption = values['A']
-        detections = detection_captions[video_id]
+    for video_id, values in tqdm(video_descriptions.items(), desc="Processing videos"):
+        video_description = values['A']
 
+        image_captions = cogvlm_captions[video_id]
         mega_caption = ""
 
-        for detection in detections:
-            mega_caption += detection
+        for caption in image_captions:
+            mega_caption += caption
 
         while(True):
-            # Generate QA pairs with OpenAI GPT-3: Summarization
-            completion_0 = client.chat.completions.create(
+            completion_0 = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
@@ -93,7 +80,7 @@ def annotate(args, client):
                     {
                         "role": "user",
                         "content":
-                            f"The video caption is: {caption}. "
+                            f"The video caption is: {video_description}. "
                             f"The additional dense caption is: {mega_caption}"
                             "Generate three different questions on summarizing the video, and provide answers that are paraphrased versions of the given caption and the dense caption. "
                             "Please attempt to form question and answer pairs based on the two sets of text."
@@ -116,7 +103,7 @@ def annotate(args, client):
 
             # Generate QA pairs with OpenAI GPT-3: Caption Based
             # Answers specifically restricted to information in the caption
-            completion_1 = client.chat.completions.create(
+            completion_1 = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
@@ -147,7 +134,7 @@ def annotate(args, client):
                     {
                         "role": "user",
                         "content":
-                            f"The video caption is: {caption}. "
+                            f"The video caption is: {video_description}. "
                             f"The additional dense caption is: {mega_caption}"
                             "Generate three different questions on the details of the video, and provide answers that are paraphrased versions of the given caption and the dense caption. "
                             "Please attempt to form question and answer pairs based on the two sets of text."
@@ -172,41 +159,44 @@ def annotate(args, client):
             except AttributeError as e:
                 print(f"Error accessing completion data: {e}")
 
-    output_path = os.path.join(args.output_dir, "results.json")
-    with open(output_path, "w") as f:
-        json.dump(results, f, indent=4)        
-        print(f"Completed, Annotations saved in {output_path}")
-            
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time: {elapsed_time:.2f} seconds -----> {elapsed_time/60:.2f} minutes")
+    return results
 
 def parse_args():
-    """
-    Command-line argument parser.
-    """
     parser = argparse.ArgumentParser(description="Descriptive question-answer-generation-using-GPT-3")
-    parser.add_argument("--cogvlm_captions_file", required=True, help="Path to the CogVLM captions JSON file.")
-    parser.add_argument("--detection_captions_file", required=True, help="Path to the detection captions JSON file.")
-    parser.add_argument("--output_dir", required=True, help="Path to save the annotation JSON files.")
-
+    parser.add_argument("--step3_image_captions_path", required=True, help="Path to the CogVLM image captions JSON file.")
+    parser.add_argument("--step4_WS_video_descs", required=True, help="Path to the weakly supervised descriptions captions JSON file.")
+    parser.add_argument("--openai_api_key", required=True, help="OpenAI API key.")
     return parser.parse_args()
 
 def main():
-    """
-    Main function to control the flow of the program.
-    """
-    # Parse arguments
     args = parse_args()
+    openai.api_key = args.openai_api_key
 
-    client = OpenAI(
-        api_key=" ",
-    )
+    results = annotate(args)
 
-    annotate(args, client)
+    with open('./generated_QA.json', "w") as f:
+        json.dump(results, f, indent=4)
+
+    output_for_training = []
+
+    for video_qas in results:
+        video_id = video_qas[-1]['id']
+
+        for i, qa in enumerate(video_qas[:-1]):
+            question = qa['Q']
+            answer = qa['A']
+            output_content = {'id': video_id, 'video': f'{video_id}.pkl', 'object': f'{video_id}_object.pkl', 'pose': f'{video_id}_pose.pkl', 'conversations': []}
+
+            if i % 2 == 0:
+                output_content['conversations'].append({'from': 'human', 'value': f"{question}\n<video><object><human_pose>"})
+            else:
+                output_content['conversations'].append({'from': 'human', 'value': f"<video><object><human_pose>\n{question}"})
+
+            output_content['conversations'].append({'from': 'gpt', 'value': answer})
+            output_for_training.append(output_content)
     
+    with open('./adlx_QAs_for_training.json', 'w') as f:
+        json.dump(output_for_training, f, indent=4)
+
 if __name__ == "__main__":
     main()
-
-
-
-

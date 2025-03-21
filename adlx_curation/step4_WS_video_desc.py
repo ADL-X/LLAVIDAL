@@ -14,8 +14,8 @@ def parse_args():
     Command-line argument parser.
     """
     parser = argparse.ArgumentParser(description="Descriptive question-answer-generation-using-GPT-3")
-    parser.add_argument("--gt_caption_file", required=True, help="Path to the ground truth captions file.")
-    parser.add_argument("--output_dir", required=True, help="Path to save the combined annotation JSON file.")
+    parser.add_argument("--step3_description_json", required=True, help="Path to the image captions from step3.")
+    parser.add_argument("--openai_api_key", required=True, help="OpenAI API key.")
     return parser.parse_args()
 
 def annotate(captions):
@@ -73,48 +73,34 @@ def annotate(captions):
     
     return response_dict
 
-def save_progress(combined_annotations, output_dir):
-    """
-    Saves the current progress of the combined annotations to a JSON file.
-    """
-    progress_output_path = os.path.join(output_dir, "video_descriptions_progress.json")
-    with open(progress_output_path, "w") as f:
-        json.dump(combined_annotations, f, indent=4)
-    print(f"Progress saved to {progress_output_path}")
-
 def main():
     args = parse_args()
     
-    combined_output_path = os.path.join(args.output_dir, "dense_descriptions.json")
+    combined_output_path = './dense_descriptions.json'
     
     # Check if dense_descriptions.json already exists
     if os.path.exists(combined_output_path):
         print(f"dense_descriptions.json already exists at {combined_output_path}. Skipping processing.")
         return
     
-    with open(args.gt_caption_file) as file:
-        gt_captions = json.load(file)
+    with open(args.step3_description_json) as file:
+        image_captions = json.load(file)
     
-    openai.api_key = ""  # Replace with your actual API key
-    
-    if not os.path.exists(args.output_dir):
-        os.makedirs(args.output_dir)
+    openai.api_key = args.openai_api_key  # Replace with your actual API key
     
     combined_annotations = {}
-    save_interval = 10  # Save progress every 10 items
+    save_interval = 10  # Save progress every 10 videos
     
-    for idx, (video_path, descriptions) in enumerate(tqdm(gt_captions.items())):
-        video_id = video_path.split('/')[-1].split('.')[0]  # Extract the video ID
+    for idx, (video_id, descriptions) in enumerate(tqdm(image_captions.items())):
         response_dict = annotate(descriptions)
         combined_annotations[video_id] = response_dict
         
         # Save progress periodically
-        if (idx + 1) % save_interval == 0:
-            save_progress(combined_annotations, args.output_dir)
-    
-    # Save the final combined annotations to a JSON file
-    with open(combined_output_path, "w") as f:
-        json.dump(combined_annotations, f, indent=4)
+        if (idx + 1) % save_interval == 0 or (idx + 1) == len(image_captions):
+            with open(combined_output_path, "w") as f:
+                json.dump(combined_annotations, f, indent=4)
+
     print(f"Completed, all annotations saved in {combined_output_path}")
+
 if __name__ == "__main__":
     main()
