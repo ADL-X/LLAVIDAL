@@ -1,7 +1,7 @@
 # <img src="./llavidal/static/llavidal.ico"  style="vertical-align:middle;"/> LLAVIDAL: Benchmarking Large LAnguage VIsion Models for Daily Activities of Living 🏃👩‍🦯‍➡️🗨️
 
 <p align="center">
-  <img src="./llavidal/static/adlxteaser.gif" alt="LLAVIDAL Approach Overview">
+  <img src="./llavidal/static/adlx-curation-web.jpg" alt="LLAVIDAL Approach Overview">
 </p>   
 
 This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Video-ChatGPT).
@@ -31,19 +31,6 @@ This codebase is adapted from [Video-ChatGPT](https://github.com/mbzuai-oryx/Vid
         <td><a href="#adl-x-data-curation-pipeline-">I want to generate the ADL-X dataset</td>
     </tr></tbody>
 </table>
-
-## LLAVIDAL Architecture ⚙️
-
-<p align="center">
-  <img src="./llavidal/static/ADL-architecture.png" alt="LLAVIDAL Architecture Overview">
-</p>   
-
-
-Overview of LLAVIDAL, which utilizes an LLM to integrate multiple modalities, including
-video, pose, and object features. Videos are represented by embeddings obtained from a VLM, poses
-are processed through (PoseLM), and object embeddings are obtained through (ObjectLM). These
-embeddings are projected into the LLM space, where they are concatenated with tokenized text
-queries for instruction tuning.
 
 ---
 
@@ -146,7 +133,11 @@ The final model will be available in the directory you ran the above command at 
 
 ---
 
-## ADL-X Data Curation Pipeline 📖 
+## ADL-X Data Curation Pipeline 📖
+
+<p align="center">
+  <img src="./llavidal/static/adlx-curation-web.jpg" alt="LLAVIDAL Architecture Overview">
+</p>   
 
 **NOTE: If you are only interested in training LLAVIDAL, you can skip this process entirely and download the RGB/Object/Skeleton features of the ADL-X dataset in the [Available Resources](#available-resources) section above**
 
