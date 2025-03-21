@@ -246,11 +246,9 @@ python run_inference_descriptions_smarthome.py
 
 ## ADL-X Dataset Details 📂
 
-We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos but we are providing the video features of our dataset,we are also providing the object features and the pose features.
+We are introducing ADLX the first ADL centric video instruction dataset, due to licensing restrictions we cannot share the original videos, but we share the [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip)
 
-The dataset is in [LINK](https://huggingface.co/datasets/dreilly/ADL-X/tree/main). The folders are [Video_features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip) , [Pose Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/pose_features.zip) and [Object Features](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/multimodal_features/object_features.zip)
-
-The video features are like 
+The video features are structured as
 ```
 Video Features
 ├── 001_video_001.pkl
@@ -264,7 +262,7 @@ Video Features
 ```
 each video feature is of dimension 356 x 1024.
 
-The pose features are like
+The pose features are structured as
 ```
 Pose Features
 ├── 001_001_video_001_pose.pickle
@@ -279,7 +277,7 @@ Pose Features
 ```
 each pose feature is of the dimension 216 x 256
 
-The object features are like
+The object features are structured as
 ```
 Object Features
 ├── 001_001_video_001_object.pkl
