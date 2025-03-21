@@ -11,8 +11,6 @@ args = parser.parse_args()
 
 cropped_ntu_dir = args.cropped_ntu_dir
 save_dir = args.save_dir
-# cropped_ntu_dir = '/data/vidlab_datasets/ntu/NTU_224x224/rgb/'
-# save_dir = '/data/users/dreilly1/LLAVIDAL_datagen/ADLX_regen/'
 os.makedirs(save_dir, exist_ok=True)
 
 all_video_mappings = json.load(open(args.video_mapping_json, 'r'))

@@ -4,7 +4,7 @@
 python step1_person_augmented_generation.py --ntu_data_path /path/to/NTU120 --new_dataset_name NTU-PAG_224x224 --slack 64 --new_shape 224 224
 
 # Step 2: Temporally stitch the videos. They are saved to save_dir
-python step2_temporal_stitching.py --cropped_ntu_dir /path/to/NTU-PAG_224x224 --save_dir /directory/to/save/stitched/videos/
+python step2_temporal_stitching.py --cropped_ntu_dir /path/to/NTU-PAG_224x224 --save_dir /directory/to/save/stitched/videos/ --video_mapping_json ./video_mapping.json
 
 # Step 3: Generate frame level captions from stitched videos. Will generate "./cogvlm_{args.proc_num}.json" in the current directory. You need to combine these jsons into a single one.
 ## This script can be run in parallel to speed up the process. We use 8 GPUs and run the following command.
