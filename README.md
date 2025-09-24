@@ -302,7 +302,7 @@ If you're using LLAVIDAL in your research or application, please consider citing
 @inproceedings{llavidal2024,
   title={LLAVIDAL: A Large LAnguage VIsion Model for Daily Activities of Living}, 
   author={Dominick Reilly and Rajatsubhra Chakraborty and Arkaprava Sinha and Manish Kumar Govind and Pu Wang and Francois Bremond and Le Xue and Srijan Das},
-    booktitle={Proceedings of the Conference on Computer Vision and Pattern Recognition (CVPR)}
+    booktitle={Proceedings of the Conference on Computer Vision and Pattern Recognition (CVPR)},
     year={2025}
 }
 ```
