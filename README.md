@@ -84,6 +84,10 @@ Benchmarks in ADL-X consist of Action Recognition (AR), Temporal Completion (TC)
 * **Temporal Completion (TC) Benchmarks:** LEMMA-TC, TSU-TC
 * **Video Description (Description) Benchmarks:** Charades-Description, TSU-Description
 
+We provide instructions for all benchmarks, as well as the required videos for Charades-AR, LEMMA-TC, and Charades-Description through [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X-Evals)
+* For Smarthome-AR, the required videos can be requested though [their official webpage](https://project.inria.fr/toyotasmarthome/)
+* For TSU, permission to publicize the required videos is **pending**
+
 Steps to evaluate LLAVIDAL
 1. Download the evaluation data from [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X-Evals)
 2. Update the video directories and json instruction paths in `evaluation/ADL-X/run_evals.sh`
