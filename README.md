@@ -47,7 +47,7 @@ pip install -r requirements.txt
 export PYTHONPATH="./:$PYTHONPATH"
 ```
 
-Additionally, if you are using A100/H100 GPUs you can install [FlashAttention](https://github.com/HazyResearch/flash-attention),
+Additionally, if you are using Ampere series or higher GPUs you can install [FlashAttention](https://github.com/HazyResearch/flash-attention),
 ```shell
 pip install ninja
 
@@ -75,6 +75,21 @@ python llavidal/demo/video_demo.py \
 ```
 
 After running the command a URL will be provided. Click this URL and follow the on-screen instructions to use the demo.
+
+---
+
+## Quantitative Evaluation 🧪
+Benchmarks in ADL-X consist of Action Recognition (AR), Temporal Completion (TC), and Video Description (Description) tasks. AR and TC tasks consist of multiple-choice questions, while Description tasks consist of open-ended questions
+* **Action Recognition (AR) Benchmarks:** Smarthome-AR, Charades-AR
+* **Temporal Completion (TC) Benchmarks:** LEMMA-TC, TSU-TC
+* **Video Description (Description) Benchmarks:** Charades-Description, TSU-Description
+
+Steps to evaluate LLAVIDAL
+1. Download the evaluation data from [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X-Evals)
+2. Update the video directories and json instruction paths in `evaluation/ADL-X/run_evals.sh`
+3. Download the base [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1) weights, then update `BASE_LLAVA_PATH` in `evaluation/ADL-X/run_evals.sh`
+Download the LLAVIDAL weights (`llavidal_weights.bin`) from [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights), then update `MODEL_PATHS` and `OUTPUT_NAMES` in `evaluation/ADL-X/run_evals.sh`
+4. Run `bash evaluation/ADL-X/run_evals.sh`
 
 ---
 
@@ -171,67 +186,6 @@ For training efficiency, we pre-compute the spatio-temporal video features used 
 ```
 
 **4.** Download the pre-computed pose (`pose_features.zip`) and object features (`object_features.zip`) from [Available Resources](#available-resources) and extract them
-
----
-
-## Quantitative Evaluation 🧪
-
-We introduce two new evaluation for ADL centric tasks -- [ADLMCQ-AR & ADLMCQ-AF](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/evaluation) which are MCQs conttaining Action Recognition and Action Forecasting Tasks.
-We also release [SmartHome Untrimmed Descriptions](https://huggingface.co/datasets/dreilly/ADL-X/blob/main/evaluation/Video_description_Smarthome_Untrimmed.json) for the first time.
-
-Step 1: Download all the datasets-- [Charades](https://prior.allenai.org/projects/charades) , [LEMMA](https://sites.google.com/view/lemma-activity)(We use the exo-view) ,[SMARTHOME UNTRIMMED and TRIMMED](https://project.inria.fr/toyotasmarthome/).
-
-Step 2: For Action Forecasting access the json files and slice the videos from the start frame and end frame.For action recognition nothing is needed.
-
-
-Step 3: Arrange the data like that in the json file provided and run the command ,
-```shell
-cd llavidal/eval/
-```
-```shell
-python run_inference_action_recognition_charades.py
---video_dir /path/to/videos \
-  --qa_file /path/to/qa_file.json \
-  --output_dir /path/to/output \
-  --output_name results \
-  --model-name <LLAVA model path> \
-  --conv-mode llavidal_v1 \
-  --projection_path <path to LLAVIDAL WEIGHTS> 
-```
-
-
-Step 3: Evaulate using GPT3.5 Turbo api 
-```shell
-cd quantitative_evaluation/
-```
-```shell
-evaluate_action_recognition_charades.py
-```
-and pass the above results in STEP 2.
-
-For other methods the above steps are same 
-
------------------
-For video descriptions for Charades run command 
-
-```shell
-cd llavidal/eval
-```
-```shell
-python run_inference_benchmark_general.py
-```
-Pass the appropiate paths to get the results josn
-
-For video descriptions for Smarthome Untrimmed ,slice the videos in 1 minutes each and make a dense description like that of data curation process.
-
-To get individual descriptions 
-
-```shell
-cd llavidal/eval
-```
-```shell
-python run_inference_descriptions_smarthome.py
-```
 
 ---
 
