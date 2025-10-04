@@ -79,21 +79,44 @@ After running the command a URL will be provided. Click this URL and follow the 
 ---
 
 ## Quantitative Evaluation 🧪
-Benchmarks in ADL-X consist of Action Recognition (AR), Temporal Completion (TC), and Video Description (Description) tasks. AR and TC tasks consist of multiple-choice questions, while Description tasks consist of open-ended questions
-* **Action Recognition (AR) Benchmarks:** Smarthome-AR, Charades-AR
-* **Temporal Completion (TC) Benchmarks:** LEMMA-TC, TSU-TC
-* **Video Description (Description) Benchmarks:** Charades-Description, TSU-Description
+Benchmarks in ADL-X consist of Action Recognition (AR), Temporal Completion (TC), and Video Description (Description) tasks. AR and TC tasks consist of multiple-choice questions, while Description tasks consist of open-ended questions.
+<div align="center">
+  
+| Action Recognition (AR) | Temporal Completion (TC) | Video Description    |
+|-------------------------|--------------------------|--------------------|
+| Smarthome-AR            | LEMMA-TC                 | Charades-Description |
+| Charades-AR             | TSU-TC                   | TSU-Description      |
 
-We provide instructions for all benchmarks, as well as the required videos for Charades-AR, LEMMA-TC, and Charades-Description through [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X-Evals)
-* For Smarthome-AR, the required videos can be requested though [their official webpage](https://project.inria.fr/toyotasmarthome/)
-* For TSU, permission to publicize the required videos is **pending**
+</div>
 
-Steps to evaluate LLAVIDAL
-1. Download the evaluation data from [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X-Evals)
-2. Update the video directories and json instruction paths in `evaluation/ADL-X/run_evals.sh`
+### Getting started
+1. **Download all video-QA pairs and Charades/LEMMA videos** through [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X-Evals)
+
+2. **Obtain access to Toyota Smarthome (Smarthome) and Toyota Smarthome Untrimmed (TSU) videos** though [their official webpage](https://project.inria.fr/toyotasmarthome/)
+
+### Preparing Smarthome and TSU datasets
+1. Process the Smarthome dataset for Smarthome-AR (perform human cropping)
+```shell
+python scripts/data_processing/sh_human_cropping.py --smarthome_vid_path /path/to/smarthome/trimmed/mp4 --output_vid_dir /path/to/save/human_cropped_videos
+```
+
+2. Process the TSU dataset for TSU-TC (extract action clips)
+```shell
+python scripts/data_processing/tsu_trim_actions.py --csv_root_dir /path/to/smarthome_untrimmed/Annotation --video_root_dir /path/to/smarthome_untrimmed/Videos_MP4 --output_vid_dir /path/to/save/TSU_TC_videos
+```
+
+3. Process the TSU dataset for TSU-Descriptions (extract 1 second clips)
+```shell
+python scripts/data_processing/tsu_trim_1sec_clips.py --tsu_videomp4 /path/to/smarthome_untrimmed/Videos_MP4 --output_vid_dir /path/to/save/TSU_Descriptions_videos
+```
+
+### Run evaluations
+1. Update the video directories and json instruction paths in `evaluation/ADL-X/run_evals.sh`
 3. Download the base [LLaVA-7B-Lightening-v1-1](https://huggingface.co/mmaaz60/LLaVA-7B-Lightening-v1-1) weights, then update `BASE_LLAVA_PATH` in `evaluation/ADL-X/run_evals.sh`
-Download the LLAVIDAL weights (`llavidal_weights.bin`) from [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights), then update `MODEL_PATHS` and `OUTPUT_NAMES` in `evaluation/ADL-X/run_evals.sh`
-4. Run `bash evaluation/ADL-X/run_evals.sh`
+4. Download the LLAVIDAL weights (`llavidal_weights.bin`) from [HuggingFace](https://huggingface.co/datasets/dreilly/ADL-X/tree/main/model_weights), then update `MODEL_PATHS` and `OUTPUT_NAMES` in `evaluation/ADL-X/run_evals.sh`
+5. Run `bash evaluation/ADL-X/run_evals.sh`
+
+**IF YOU HAVE TROUBLE REPRODUCING RESULTS ON MCQ TASKS** try using the legacy version of the MCQ evaluations by setting `RUN_LEGACY_MCQ=true` in `evaluation/ADL-X/run_evals.sh`.
 
 ---
 
