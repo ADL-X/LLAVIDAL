@@ -20,7 +20,6 @@ def parse_args():
     parser.add_argument('--gt_file', help='Path to the json file containing video descriptions.', required=True)
     parser.add_argument('--output_dir', help='Directory to save the model results JSON.', required=True)
     parser.add_argument('--output_name', help='Name of the file for storing results JSON.', required=True)
-    parser.add_argument('--max_visual_tokens', type=int, default=None, help='Maximum number of visual tokens.')
     parser.add_argument("--debug", action='store_true', help='Debug mode.')
     parser.add_argument("--seed", type=int, default=127, help='Random seed.')
     parser.add_argument("--openai_api_key", type=str, required=True, help='OpenAI API key for GPT-3.5 Turbo.')
@@ -105,7 +104,7 @@ def main():
             # > General descriptions
             '''
             try:
-                prediction_general = model_infer(frames, desc_question, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len, max_new_tokens=args.max_new_tokens)
+                prediction_general = model_infer(frames, desc_question, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len)
 
                 per_clip_general_descriptions.append(prediction_general)
 
@@ -165,9 +164,9 @@ def main():
                 continue
 
             try:
-                prediction_cons_1 = model_infer(frames, question_cons_1, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len, max_new_tokens=args.max_new_tokens)
+                prediction_cons_1 = model_infer(frames, question_cons_1, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len)
 
-                prediction_cons_2 = model_infer(frames, question_cons_2, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len, max_new_tokens=args.max_new_tokens)
+                prediction_cons_2 = model_infer(frames, question_cons_2, conv_mode, model, vision_tower, tokenizer, image_processor, video_token_len)
 
                 cons_1_answers.append(prediction_cons_1)
                 cons_2_answers.append(prediction_cons_2)
